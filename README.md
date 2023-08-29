@@ -10,7 +10,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 
 
 ## Requirements
-- GitLab 15.11 since they use inputs, see https://docs.gitlab.com/ee/ci/yaml/includes.html#define-inputs-for-configuration-added-with-include-beta.
+- GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ee/ci/yaml/includes.html#define-inputs-for-configuration-added-with-include-beta).
 - Shell with curl should be available on the executor
 - Network access to download from Maven central and from GitHub (those URLs can be customized, see [Configuration](#Configuration)
 
@@ -101,8 +101,8 @@ For the Common Custom User Data Maven extension which is defined with the `ccudM
 
 ## Authentication
 To authenticate against the Gradle Enterprise server, you should specify a masked environment variable named `GRADLE_ENTERPRISE_ACCESS_KEY`.
-See https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-the-ui on how to do this in GitLab UI.
-To generate a Gradle Enterprise Access Key, you can check https://docs.gradle.com/enterprise/gradle-plugin/#manual_access_key_configuration for Gradle and https://docs.gradle.com/enterprise/maven-extension/#manual_access_key_configuration for Maven.
+See [here](https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-the-ui) on how to do this in GitLab UI.
+To generate a Gradle Enterprise Access Key, you can check [Gradle Enterprise Gradle plugin docs](https://docs.gradle.com/enterprise/gradle-plugin/#manual_access_key_configuration) and [Gradle Enterprise Maven extension docs](https://docs.gradle.com/enterprise/maven-extension/#manual_access_key_configuration).
 
 ## License
 This project is available under the [Apache License, Version 2.0](https://github.com/gradle/gradle-enterprise-bamboo-plugin/blob/main/LICENSE).
