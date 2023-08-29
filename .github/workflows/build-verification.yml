@@ -1,0 +1,39 @@
+name: Verify Build
+
+on: [ push, pull_request, workflow_dispatch ]
+
+env:
+    # https://gitlab.com/gradle7272134/gradle-enterprise-smoke-tests
+    GITLAB_PROJECT_ID: 48766853
+
+jobs:
+  verification:
+    name: Smoke test on GitLab
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      - name: Run GitLab Build
+        id: run-gitlab-build
+        run: |
+            echo "Trigger GitLab Pipeline at https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
+            pipelineId=$(curl -s -S -X POST --fail -F token=${{ secrets.GITLAB_TRIGGER_TOKEN }} -F ref=main -F variables[GITHUB_BRANCH]="${{ steps.extract_branch.outputs.branch }}" "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline" | jq .id)
+            if [ $? -ne 0 ]; then
+                echo "Failed creating build"
+                exit 1
+            fi
+            echo "GITLAB_PIPELINE_ID=${pipelineId}" >> "${GITHUB_OUTPUT}"
+      - name: Check GitLab Status
+        run: |
+            pipelineId=${{ steps.run-gitlab-build.outputs.GITLAB_PIPELINE_ID }}
+            status=""
+            until [[ $status =~ (success|failed|canceled|skipped) ]]; do
+              status=$(curl -s -S -H 'PRIVATE-TOKEN: ${{ secrets.GITLAB_TOKEN }}' https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/pipelines/${pipelineId} | jq .status)
+              echo "Checking GitLab Pipeline status at https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/pipelines/${pipelineId}: ${status}"
+              sleep 5
+            done
+            if [[ ! $status =~ (success) ]]; then
+                echo "::error::GitLab Pipeline https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/pipelines/${pipelineId} did not succeed, status: ${status}"
+                exit 1
+            fi

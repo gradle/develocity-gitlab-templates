@@ -1,0 +1,43 @@
+spec:
+  inputs:
+    # Gradle Enterprise server URL
+    url:
+      default: 'https://scans.gradle.com'
+    # Maven remote repository to download extension jars from
+    mavenRepo:
+      default: 'https://repo1.maven.org/maven2'
+    # Gradle Enterprise Maven extension version
+    mavenExtensionVersion:
+      default: '1.17.4'
+    # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
+    ccudMavenExtensionVersion:
+      default: '1.12'
+    # Allow untrusted server
+    allowUntrustedServer:
+      default: 'false'
+---
+.injectGradleEnterpriseForMaven: &injectGradleEnterpriseForMaven |
+  function create_tmp() {
+    export TMP_GE=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
+  }
+
+  function download_ge_ccud_ext() {
+    local ext_path="${TMP_GE}/common-custom-user-data-maven-extension.jar"
+    curl -s $[[ inputs.mavenRepo ]]/com/gradle/common-custom-user-data-maven-extension/$[[ inputs.ccudMavenExtensionVersion ]]/common-custom-user-data-maven-extension-$[[ inputs.ccudMavenExtensionVersion ]].jar -o "${ext_path}"
+    export CCUD_EXT_PATH="${ext_path}"
+  }
+
+  function download_ge_maven_ext() {
+    local ext_path="${TMP_GE}/gradle-enterprise-maven-extension.jar"
+    curl -s $[[ inputs.mavenRepo ]]/com/gradle/gradle-enterprise-maven-extension/$[[ inputs.mavenExtensionVersion ]]/gradle-enterprise-maven-extension-$[[ inputs.mavenExtensionVersion ]].jar -o "${ext_path}"
+    export GRADLE_ENTERPRISE_EXT_PATH="${ext_path}"
+  }
+
+  function inject_gradle_enterprise_for_maven() {
+    export "MAVEN_OPTS=-Dmaven.ext.class.path=${GRADLE_ENTERPRISE_EXT_PATH}:${CCUD_EXT_PATH} -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.url=$[[ inputs.url ]] -Dgradle.enterprise.allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]"
+  }
+
+  create_tmp
+  download_ge_ccud_ext
+  download_ge_maven_ext
+  inject_gradle_enterprise_for_maven
