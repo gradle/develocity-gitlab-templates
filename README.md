@@ -21,7 +21,7 @@ To enable Build Scan publishing for Gradle builds, the configuration would look 
 
 ```yml
 include:
-  - remote: 'https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/main/gradle-enterprise-gradle.yml'
+  - remote: 'https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/1.0.0/gradle-enterprise-gradle.yml'
     inputs:
       url: https://gradle-enterprise.mycompany.com
 
@@ -43,7 +43,7 @@ To enable Build Scan publishing for Maven builds, the configuration would look s
 
 ```yml
 include:
-  - remote: 'https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/main/gradle-enterprise-maven.yml'
+  - remote: 'https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/1.0.0/gradle-enterprise-maven.yml'
     inputs:
       url: https://gradle-enterprise.mycompany.com
 
@@ -55,7 +55,7 @@ build-maven-job:
     - ./mvnw clean verify # Will publish a build scan to https://gradle-enterprise.mycompany.com
 ```
 
-The `.injectGradleEnterpriseForMaven` downloads the extensions and references them in `MAVEN_OPTS`. 
+The `.injectGradleEnterpriseForMaven` downloads the extensions and references them in `MAVEN_OPTS`.
 For all other options see `inputs` section in [gradle-enterprise-maven.yml](gradle-enterprise-maven.yml).
 
 > **_NOTE:_** This instrumentation defines the environment variable `MAVEN_OPTS` taken into account by Maven builds. If `MAVEN_OPTS` is redefined, the instrumentation won't work
@@ -67,10 +67,10 @@ If you have both Gradle and Maven builds in a pipeline, you can simply just incl
 
 ```yml
 include:
-  - remote: "https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/main/gradle-enterprise-gradle.yml"
+  - remote: "https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/1.0.0/gradle-enterprise-gradle.yml"
     inputs:
       url: https://gradle-enterprise.mycompany.com
-  - remote: "https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/main/gradle-enterprise-maven.yml"
+  - remote: "https://raw.githubusercontent.com/gradle/gradle-enterprise-gitlab-templates/1.0.0/gradle-enterprise-maven.yml"
     inputs:
       url: https://gradle-enterprise.mycompany.com
 
