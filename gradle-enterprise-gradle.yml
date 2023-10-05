@@ -5,13 +5,13 @@ spec:
       default: 'https://scans.gradle.com'
     # Gradle Enterprise Plugin version
     gradlePluginVersion:
-      default: '3.13.4'
+      default: '3.15'
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
     ccudPluginVersion:
-      default: '1.11'
+      default: '1.11.3'
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
