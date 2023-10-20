@@ -8,10 +8,10 @@ spec:
       default: 'https://repo1.maven.org/maven2'
     # Gradle Enterprise Maven extension version
     mavenExtensionVersion:
-      default: '1.17.4'
+      default: '1.19.3'
     # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
     ccudMavenExtensionVersion:
-      default: '1.12'
+      default: '1.12.4'
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
