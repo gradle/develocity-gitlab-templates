@@ -1,6 +1,6 @@
 spec:
   inputs:
-    # Gradle Enterprise server URL
+    # Develocity server URL
     url:
       default: 'https://scans.gradle.com'
     # Maven remote repository to download extension jars from
@@ -16,7 +16,7 @@ spec:
     allowUntrustedServer:
       default: 'false'
 ---
-.injectGradleEnterpriseForMaven: &injectGradleEnterpriseForMaven |
+.injectDevelocityForMaven: &injectDevelocityForMaven |
   function create_tmp() {
     export TMP_GE=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
   }
@@ -30,14 +30,14 @@ spec:
   function download_ge_maven_ext() {
     local ext_path="${TMP_GE}/gradle-enterprise-maven-extension.jar"
     curl -s $[[ inputs.mavenRepo ]]/com/gradle/gradle-enterprise-maven-extension/$[[ inputs.mavenExtensionVersion ]]/gradle-enterprise-maven-extension-$[[ inputs.mavenExtensionVersion ]].jar -o "${ext_path}"
-    export GRADLE_ENTERPRISE_EXT_PATH="${ext_path}"
+    export DEVELOCITY_EXT_PATH="${ext_path}"
   }
 
-  function inject_gradle_enterprise_for_maven() {
-    export "MAVEN_OPTS=-Dmaven.ext.class.path=${GRADLE_ENTERPRISE_EXT_PATH}:${CCUD_EXT_PATH} -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.url=$[[ inputs.url ]] -Dgradle.enterprise.allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]"
+  function inject_develocity_for_maven() {
+    export "MAVEN_OPTS=-Dmaven.ext.class.path=${DEVELOCITY_EXT_PATH}:${CCUD_EXT_PATH} -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.url=$[[ inputs.url ]] -Dgradle.enterprise.allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]"
   }
 
   create_tmp
   download_ge_ccud_ext
   download_ge_maven_ext
-  inject_gradle_enterprise_for_maven
+  inject_develocity_for_maven

@@ -1,9 +1,9 @@
 spec:
   inputs:
-    # Gradle Enterprise server URL
+    # Develocity server URL
     url:
       default: 'https://scans.gradle.com'
-    # Gradle Enterprise Plugin version
+    # Develocity Plugin version
     gradlePluginVersion:
       default: '3.16.1'
     # Enforce the url over any defined locally to the project
@@ -17,7 +17,7 @@ spec:
       default: 'false'
 
 ---
-.injectGradleEnterpriseForGradle: &injectGradleEnterpriseForGradle |
+.injectDevelocityForGradle: &injectDevelocityForGradle |
   function create_gradle_init() {
     local tmp_ge=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
     local init_script="${tmp_ge}/init-script.gradle"
@@ -40,14 +40,14 @@ spec:
           }
 
           // finish early if injection is disabled
-          def gradleInjectionEnabled = getInputParam("gradle-enterprise.gradle-injection-enabled")
+          def gradleInjectionEnabled = getInputParam("develocity.gradle-injection-enabled")
           if (gradleInjectionEnabled == "false") {
               return
           }
 
-          def pluginRepositoryUrl = getInputParam('gradle-enterprise.plugin-repository.url')
-          def gePluginVersion = getInputParam('gradle-enterprise.plugin.version')
-          def ccudPluginVersion = getInputParam('gradle-enterprise.ccud.plugin.version')
+          def pluginRepositoryUrl = getInputParam('develocity.plugin-repository.url')
+          def gePluginVersion = getInputParam('develocity.plugin.version')
+          def ccudPluginVersion = getInputParam('develocity.ccud.plugin.version')
 
           def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
           def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
@@ -96,16 +96,16 @@ spec:
       }
 
       // finish early if injection is disabled
-      def gradleInjectionEnabled = getInputParam("gradle-enterprise.gradle-injection-enabled")
+      def gradleInjectionEnabled = getInputParam("develocity.gradle-injection-enabled")
       if (gradleInjectionEnabled == "false") {
           return
       }
 
-      def geUrl = getInputParam('gradle-enterprise.url')
-      def geAllowUntrustedServer = Boolean.parseBoolean(getInputParam('gradle-enterprise.allow-untrusted-server'))
-      def geEnforceUrl = Boolean.parseBoolean(getInputParam('gradle-enterprise.enforce-url'))
-      def gePluginVersion = getInputParam('gradle-enterprise.plugin.version')
-      def ccudPluginVersion = getInputParam('gradle-enterprise.ccud.plugin.version')
+      def geUrl = getInputParam('develocity.url')
+      def geAllowUntrustedServer = Boolean.parseBoolean(getInputParam('develocity.allow-untrusted-server'))
+      def geEnforceUrl = Boolean.parseBoolean(getInputParam('develocity.enforce-url'))
+      def gePluginVersion = getInputParam('develocity.plugin.version')
+      def ccudPluginVersion = getInputParam('develocity.ccud.plugin.version')
 
       def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
 
@@ -216,16 +216,16 @@ spec:
       }
   EOF
 
-    export GRADLE_ENTERPRISE_INIT_SCRIPT_PATH="${init_script}"
+    export DEVELOCITY_INIT_SCRIPT_PATH="${init_script}"
   }
 
-  function inject_gradle_enterprise_for_gradle() {
-    export "GRADLE_ENTERPRISE_URL=$[[ inputs.url ]]"
-    export "GRADLE_ENTERPRISE_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
-    export "GRADLE_ENTERPRISE_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
-    export "GRADLE_ENTERPRISE_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
-    export "GRADLE_ENTERPRISE_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
+  function inject_develocity_for_gradle() {
+    export "DEVELOCITY_URL=$[[ inputs.url ]]"
+    export "DEVELOCITY_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
+    export "DEVELOCITY_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
+    export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
+    export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
   }
 
   create_gradle_init
-  inject_gradle_enterprise_for_gradle
+  inject_develocity_for_gradle
