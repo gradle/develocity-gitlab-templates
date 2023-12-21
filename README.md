@@ -32,7 +32,7 @@ build-gradle-job:
   script:
     - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.mycompany.com
 ```
-The `.injectDevelocityForGradle` creates an init script with the instrumentation logic and exports the path as `$GRADLE_ENTERPRISE_INIT_SCRIPT_PATH` environment variable.
+The `.injectDevelocityForGradle` creates an init script with the instrumentation logic and exports the path as `$DEVELOCITY_INIT_SCRIPT_PATH` environment variable.
 For all other options see `inputs` section in [develocity-gradle.yml](develocity-gradle.yml).
 
 > **_NOTE:_** The build is also instrumented with our [Common Custom User Data Gradle plugin](https://github.com/gradle/common-custom-user-data-gradle-plugin) as well, as it will provide more details about your build.
