@@ -17,7 +17,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 ## Configuration
 ### Gradle Auto-instrumentation
 Include the remote template and optionally pass inputs.
-To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://gradle-enterprise.mycompany.com/ as an example of Develocity server URL.
+To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.mycompany.com/ as an example of Develocity server URL.
 
 ```yml
 include:
@@ -69,7 +69,7 @@ If you have both Gradle and Maven builds in a pipeline, you can simply just incl
 include:
   - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.1.0/develocity-gradle.yml"
     inputs:
-      url: https://gradle-enterprise.mycompany.com
+      url: https://develocity.mycompany.com
   - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.1.0/develocity-maven.yml"
     inputs:
       url: https://develocity.mycompany.com
@@ -105,4 +105,4 @@ See [here](https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-th
 To generate a Develocity Access Key, you can check [Develocity Gradle plugin docs](https://docs.gradle.com/enterprise/gradle-plugin/#manual_access_key_configuration) and [Develocity Maven extension docs](https://docs.gradle.com/enterprise/maven-extension/#manual_access_key_configuration).
 
 ## License
-This project is available under the [Apache License, Version 2.0](https://github.com/gradle/gradle-enterprise-bamboo-plugin/blob/main/LICENSE).
+This project is available under the [Apache License, Version 2.0](https://github.com/gradle/develocity-gitlab-templates/blob/main/LICENSE).
