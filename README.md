@@ -105,4 +105,4 @@ See [here](https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-th
 To generate a Develocity Access Key, you can check [Develocity Gradle plugin docs](https://docs.gradle.com/enterprise/gradle-plugin/#manual_access_key_configuration) and [Develocity Maven extension docs](https://docs.gradle.com/enterprise/maven-extension/#manual_access_key_configuration).
 
 ## License
-This project is available under the [Apache License, Version 2.0](https://github.com/gradle/rprise-bamboo-plugin/blob/main/LICENSE).
+This project is available under the [Apache License, Version 2.0](https://github.com/gradle/develocity-gitlab-templates/blob/main/LICENSE).
