@@ -5,7 +5,7 @@ spec:
       default: 'https://scans.gradle.com'
     # Develocity Plugin version
     gradlePluginVersion:
-      default: '3.16.1'
+      default: '3.16.2'
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
