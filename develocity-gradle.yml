@@ -11,7 +11,7 @@ spec:
       default: 'false'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
     ccudPluginVersion:
-      default: '1.12.2'
+      default: '1.13'
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
