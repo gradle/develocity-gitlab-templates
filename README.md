@@ -27,9 +27,8 @@ include:
 
 build-gradle-job:
   stage: build
-  before_script:
-    - !reference [.injectDevelocityForGradle]
   script:
+    - !reference [.injectDevelocityForGradle]
     - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.mycompany.com
 ```
 The `.injectDevelocityForGradle` creates an init script with the instrumentation logic and exports the path as `$DEVELOCITY_INIT_SCRIPT_PATH` environment variable.
@@ -49,9 +48,8 @@ include:
 
 build-maven-job:
   stage: build
-  before_script:
-    - !reference [.injectDevelocityForMaven]
   script:
+    - !reference [.injectDevelocityForMaven]
     - ./mvnw clean verify # Will publish a build scan to https://develocity.mycompany.com
 ```
 
@@ -76,16 +74,14 @@ include:
 
 build-maven-job:
   stage: build
-  before_script:
-    - !reference [.injectDevelocityForMaven]
   script:
+    - !reference [.injectDevelocityForMaven]
     - ./mvnw clean verify # Will publish a build scan to https://develocity.mycompany.com
 
 build-gradle-job:
   stage: build
-  before_script:
-    - !reference [.injectDevelocityForGradle]
   script:
+    - !reference [.injectDevelocityForGradle]
     - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.mycompany.com
 ```
 
