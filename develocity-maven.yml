@@ -58,8 +58,8 @@ spec:
     local rootDir=$1
     local mavenOpts="-Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=${allowUntrustedServer}"
     local mavenExtClasspath=''
-    local appliedCustomDv=0
-    local appliedCustomCcud=0
+    local appliedCustomDv="false"
+    local appliedCustomCcud="false"
     local appliedCustomDv=$(detectExtension "${rootDir}" "$(dvCoordinates)")
     if [ "${appliedCustomDv}" = "false" ]
     then
