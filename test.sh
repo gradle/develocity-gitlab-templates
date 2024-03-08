@@ -22,9 +22,43 @@ EOF
     echo "test_detectExtension_detected: ${result}"
     assert "${result}" "true"
 
-    result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension:1.18.3")
+    result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension:1.20.1")
 
     echo "test_detectExtension_detected with version: ${result}"
+    assert "${result}" "true"
+
+    result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension:1.18.1")
+
+    echo "test_detectExtension_detected with wrong version: ${result}"
+    assert "${result}" "false"
+}
+
+function test_detectExtension_multiple_detected() {
+    local projDir=$(setupProject)
+    cat << EOF >"${projDir}/.mvn/extensions.xml"
+    <?xml version="1.0" encoding="UTF-8"?>
+    <extensions>
+        <extension>
+            <groupId>foo</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.20.1</version>
+        </extension>
+        <extension>
+            <groupId>foo</groupId>
+            <artifactId>bar2</artifactId>
+            <version>1.20.1</version>
+        </extension>
+        <extension>
+            <groupId>com.gradle</groupId>
+            <artifactId>gradle-enterprise-maven-extension</artifactId>
+            <version>1.20.1</version>
+        </extension>
+    </extensions>
+EOF
+
+    local result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension")
+
+    echo "test_detectExtension_multiple_detected: ${result}"
     assert "${result}" "true"
 }
 
@@ -261,6 +295,7 @@ test_detectExtension_detected
 test_detectExtension_notDetected
 test_detectExtension_notDetected_junk
 test_detectExtension_unexisting
+test_detectExtension_multiple_detected
 test_inject_develocity_for_maven
 test_inject_develocity_for_maven_existing_maven_opts
 test_inject_develocity_for_maven_existing_extension

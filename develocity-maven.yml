@@ -126,11 +126,15 @@ spec:
       if [ "${elementName}" = "artifactId"  ]
       then
         currentExtension="${currentExtension}:${value}"
-        if [[ "${extCoordinates}" == *"${currentExtension}"* ]]
-        then
-          echo "true"
-          return
-        fi
+      fi
+      if [ "${elementName}" = "version"  ]
+      then
+        currentExtension="${currentExtension}:${value}"
+      fi
+      if [[ "${currentExtension}" =~ ^.*:.*:.*$ && "${currentExtension}" == *"${extCoordinates}"* ]]
+      then
+        echo "true"
+        return
       fi
     done < "${extFile}"
     echo "false"
