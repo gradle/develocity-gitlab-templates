@@ -18,7 +18,7 @@ spec:
     # Enforce URL
     enforceUrl:
       default: 'true'
-    # Will not inject the Develocity extension if an extension with provided coordinates is found.
+    # Will not inject the Develocity Maven extension if an extension with provided coordinates is found.
     # Expected format 'groupId:artifactId(:version)'
     mavenExtensionCustomCoordinates:
       default: ''
