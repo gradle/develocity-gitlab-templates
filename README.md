@@ -17,7 +17,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 ## Configuration
 ### Gradle Auto-instrumentation
 Include the remote template and optionally pass inputs.
-To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.mycompany.com/ as an example of Develocity server URL.
+To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.mycompany.com as an example of Develocity server URL.
 
 ```yml
 include:
@@ -39,7 +39,7 @@ For all other options see `inputs` section in [develocity-gradle.yml](develocity
 
 ### Maven Auto-instrumentation
 Include the remote template and optionally pass inputs.
-To enable Build Scan publishing for Maven builds, the configuration would look something like presented below (using https://develocity.mycompany.com/ as an example of Develocity server URL.
+To enable Build Scan publishing for Maven builds, the configuration would look something like presented below (using https://develocity.mycompany.com as an example of Develocity server URL.
 
 ```yml
 include:
