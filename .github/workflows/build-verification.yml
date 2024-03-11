@@ -7,6 +7,13 @@ env:
     GITLAB_PROJECT_ID: 48766853
 
 jobs:
+  unit-test:
+    name: Unit test scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unit test
+        id: test
+        run: ./test.sh
   verification:
     name: Smoke test on GitLab
     runs-on: ubuntu-latest
