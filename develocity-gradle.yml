@@ -17,7 +17,7 @@ spec:
       default: 'false'
 
 ---
-.injectDevelocityForGradle: &injectDevelocityForGradle |
+.injectDevelocityForGradle: |
   function create_gradle_init() {
     local tmp_ge=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
     local init_script="${tmp_ge}/init-script.gradle"
