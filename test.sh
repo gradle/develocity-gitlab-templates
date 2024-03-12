@@ -4,6 +4,48 @@ buildDir="$(dirname $0)/build"
 DEVELOCITY_EXT_PATH="/path/to/gradle-enterprise-maven-extension.jar"
 CCUD_EXT_PATH="/path/to/common-custom-user-data-maven-extension.jar"
 
+function test_isAtLeast_Larger() {
+  local actual=$(isAtLeast 1.1 1.0)
+  local expected=1
+  echo "test_isAtLeast_Larger: actual = ${actual}; expected = ${expected}"
+  assert "$actual" "$expected"
+}
+
+function test_isAtLeast_Equal() {
+  local actual=$(isAtLeast 1.1 1.1)
+  local expected=1
+  echo "test_isAtLeast_Equal: actual = ${actual}; expected = ${expected}"
+  assert "$actual" "$expected"
+}
+
+function test_isAtLeast_Smaller() {
+  local actual=$(isAtLeast 1.1 1.2)
+  local expected=0
+  echo "test_isAtLeast_Smaller: actual = ${actual}; expected = ${expected}"
+  assert "$actual" "$expected"
+}
+
+function test_isAtLeast_Minor_And_Patch_Larger() {
+  local actual=$(isAtLeast 1.2 1.1.1)
+  local expected=1
+  echo "test_isAtLeast_Minor_And_Patch_Larger: actual = ${actual}; expected = ${expected}"
+  assert "$actual" "$expected"
+}
+
+function test_isAtLeast_Minor_And_Patch_Smaller() {
+  local actual=$(isAtLeast 1.2 1.2.1)
+  local expected=0
+  echo "test_isAtLeast_Minor_And_Patch_Larger: actual = ${actual}; expected = ${expected}"
+  assert "$actual" "$expected"
+}
+
+function test_isAtLeast_Ignore_Qualifier() {
+  local actual=$(isAtLeast 1.2-rc-4 1.2)
+  local expected=1
+  echo "test_isAtLeast_Ignore_Qualifier: actual = ${actual}; expected = ${expected}"
+  assert "$actual" "$expected"
+}
+
 function test_detectExtension_detected() {
     local projDir=$(setupProject)
     cat << EOF >"${projDir}/.mvn/extensions.xml"
@@ -291,6 +333,12 @@ function clean() {
 
 clean
 extractCodeUnderTest
+test_isAtLeast_Larger
+test_isAtLeast_Equal
+test_isAtLeast_Smaller
+test_isAtLeast_Minor_And_Patch_Larger
+test_isAtLeast_Minor_And_Patch_Smaller
+test_isAtLeast_Ignore_Qualifier
 test_detectExtension_detected
 test_detectExtension_notDetected
 test_detectExtension_notDetected_junk

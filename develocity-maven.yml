@@ -41,6 +41,16 @@ spec:
   function createTmp() {
     export TMP_GE=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
   }
+  
+  function isAtLeast() {
+    local v1=$(printf "%03d%03d%03d%03d" $(echo "$1" | cut -f1 -d"-" | tr '.' ' '));
+    local v2=$(printf "%03d%03d%03d%03d" $(echo "$2" | cut -f1 -d"-" | tr '.' ' '));
+    if [ "$v1" -eq "$v2" ] || [ "$v1" -gt "$v2" ]; then
+      echo 1;
+    else
+      echo 0;
+    fi
+  }
 
   function downloadDvCcudExt() {
     local ext_path="${TMP_GE}/common-custom-user-data-maven-extension.jar"
