@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -xv
 buildDir="$(dirname $0)/build"
-DEVELOCITY_EXT_PATH="/path/to/gradle-enterprise-maven-extension.jar"
+DEVELOCITY_EXT_PATH="/path/to/develocity-maven-extension.jar"
 CCUD_EXT_PATH="/path/to/common-custom-user-data-maven-extension.jar"
 
 function test_isAtLeast_Larger() {
@@ -53,7 +53,7 @@ function test_downloadMavenExtension_GradleEnterprise() {
   downloadDvMavenExt
   echo "test_downloadMavenExtension_GradleEnterprise: $DEVELOCITY_EXT_PATH"
   assert "$DEVELOCITY_EXT_PATH" "$buildDir/gradle-enterprise-maven-extension.jar"
-  DEVELOCITY_EXT_PATH="/path/to/gradle-enterprise-maven-extension.jar"
+  DEVELOCITY_EXT_PATH="/path/to/develocity-maven-extension.jar"
 }
 
 function test_downloadMavenExtension_Develocity() {
@@ -63,7 +63,7 @@ function test_downloadMavenExtension_Develocity() {
   downloadDvMavenExt
   echo "test_downloadMavenExtension_Develocity: $DEVELOCITY_EXT_PATH"
   assert "$DEVELOCITY_EXT_PATH" "$buildDir/develocity-maven-extension.jar"
-  DEVELOCITY_EXT_PATH="/path/to/gradle-enterprise-maven-extension.jar"
+  DEVELOCITY_EXT_PATH="/path/to/develocity-maven-extension.jar"
 }
 
 function test_detectExtension_detected() {
@@ -73,23 +73,23 @@ function test_detectExtension_detected() {
     <extensions>
         <extension>
             <groupId>com.gradle</groupId>
-            <artifactId>gradle-enterprise-maven-extension</artifactId>
+            <artifactId>develocity-maven-extension</artifactId>
             <version>1.20.1</version>
         </extension>
     </extensions>
 EOF
 
-    local result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension")
+    local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
     echo "test_detectExtension_detected: ${result}"
     assert "${result}" "true"
 
-    result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension:1.20.1")
+    result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension:1.20.1")
 
     echo "test_detectExtension_detected with version: ${result}"
     assert "${result}" "true"
 
-    result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension:1.18.1")
+    result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension:1.18.1")
 
     echo "test_detectExtension_detected with wrong version: ${result}"
     assert "${result}" "false"
@@ -112,13 +112,13 @@ function test_detectExtension_multiple_detected() {
         </extension>
         <extension>
             <groupId>com.gradle</groupId>
-            <artifactId>gradle-enterprise-maven-extension</artifactId>
+            <artifactId>develocity-maven-extension</artifactId>
             <version>1.20.1</version>
         </extension>
     </extensions>
 EOF
 
-    local result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension")
+    local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
     echo "test_detectExtension_multiple_detected: ${result}"
     assert "${result}" "true"
@@ -137,7 +137,7 @@ function test_detectExtension_notDetected() {
     </extensions>
 EOF
 
-    local result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension")
+    local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
     echo "test_detectExtension_notDetected: ${result}"
     assert $result "false"
@@ -151,7 +151,7 @@ function test_detectExtension_notDetected_junk() {
     </foo>
 EOF
 
-    local result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension")
+    local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
     echo "test_detectExtension_notDetected_junk: ${result}"
     assert $result "false"
@@ -160,7 +160,7 @@ EOF
 function test_detectExtension_unexisting() {
     local projDir=$(setupProject)
 
-    local result=$(detectExtension "${projDir}" "com.gradle:gradle-enterprise-maven-extension")
+    local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
     echo "test_detectExtension_notDetected_unexisting: ${result}"
     assert $result "false"
@@ -175,7 +175,7 @@ function test_inject_develocity_for_maven() {
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/gradle-enterprise-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost"
 }
 
 function test_inject_develocity_for_maven_existing_maven_opts() {
@@ -187,7 +187,7 @@ function test_inject_develocity_for_maven_existing_maven_opts() {
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_maven_opts: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dfoo=bar -Dmaven.ext.class.path=/path/to/gradle-enterprise-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost"
+    assert "${MAVEN_OPTS}" "-Dfoo=bar -Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost"
 }
 
 function test_inject_develocity_for_maven_existing_extension() {
@@ -260,7 +260,7 @@ EOF
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_ccud_extension: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/gradle-enterprise-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false"
 }
 
 function test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl() {
@@ -285,7 +285,7 @@ EOF
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/gradle-enterprise-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost"
 }
 
 function test_inject_develocity_for_maven_existing_dv_and_ccud_extension_enforceUrl() {
