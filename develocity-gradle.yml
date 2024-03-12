@@ -65,7 +65,7 @@ spec:
 
           if (gePluginVersion || ccudPluginVersion && atLeastGradle4) {
               pluginRepositoryUrl = pluginRepositoryUrl ?: 'https://plugins.gradle.org/m2'
-              logger.quiet("Gradle Enterprise plugins resolution: $pluginRepositoryUrl")
+              logger.lifecycle("Gradle Enterprise plugins resolution: $pluginRepositoryUrl")
 
               repositories {
                   maven {
@@ -149,8 +149,8 @@ spec:
                           it.moduleVersion.with { group == "com.gradle" && (name == "build-scan-plugin" || name == "gradle-enterprise-gradle-plugin") }
                       }
                       if (!scanPluginComponent) {
-                          logger.quiet("Applying $BUILD_SCAN_PLUGIN_CLASS via init script")
-                          logger.quiet("Connection to Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
+                          logger.lifecycle("Applying $BUILD_SCAN_PLUGIN_CLASS via init script")
+                          logger.lifecycle("Connection to Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
                           applyPluginExternally(pluginManager, BUILD_SCAN_PLUGIN_CLASS)
                           buildScan.server = geUrl
                           buildScan.allowUntrustedServer = geAllowUntrustedServer
@@ -162,7 +162,7 @@ spec:
                       if (geUrl && geEnforceUrl) {
                           pluginManager.withPlugin(BUILD_SCAN_PLUGIN_ID) {
                               afterEvaluate {
-                                  logger.quiet("Enforcing Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
+                                  logger.lifecycle("Enforcing Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
                                   buildScan.server = geUrl
                                   buildScan.allowUntrustedServer = geAllowUntrustedServer
                               }
@@ -175,7 +175,7 @@ spec:
                           it.moduleVersion.with { group == "com.gradle" && name == "common-custom-user-data-gradle-plugin" }
                       }
                       if (!ccudPluginComponent) {
-                          logger.quiet("Applying $CCUD_PLUGIN_CLASS via init script")
+                          logger.lifecycle("Applying $CCUD_PLUGIN_CLASS via init script")
                           pluginManager.apply(initscript.classLoader.loadClass(CCUD_PLUGIN_CLASS))
                       }
                   }
@@ -185,8 +185,8 @@ spec:
           gradle.settingsEvaluated { settings ->
               if (gePluginVersion) {
                   if (!settings.pluginManager.hasPlugin(GRADLE_ENTERPRISE_PLUGIN_ID)) {
-                      logger.quiet("Applying $GRADLE_ENTERPRISE_PLUGIN_CLASS via init script")
-                      logger.quiet("Connection to Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
+                      logger.lifecycle("Applying $GRADLE_ENTERPRISE_PLUGIN_CLASS via init script")
+                      logger.lifecycle("Connection to Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
                       applyPluginExternally(settings.pluginManager, GRADLE_ENTERPRISE_PLUGIN_CLASS)
                       extensionsWithPublicType(settings, GRADLE_ENTERPRISE_EXTENSION_CLASS).collect { settings[it.name] }.each { ext ->
                           ext.server = geUrl
@@ -199,7 +199,7 @@ spec:
 
                   if (geUrl && geEnforceUrl) {
                       extensionsWithPublicType(settings, GRADLE_ENTERPRISE_EXTENSION_CLASS).collect { settings[it.name] }.each { ext ->
-                          logger.quiet("Enforcing Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
+                          logger.lifecycle("Enforcing Gradle Enterprise: $geUrl, allowUntrustedServer: $geAllowUntrustedServer")
                           ext.server = geUrl
                           ext.allowUntrustedServer = geAllowUntrustedServer
                       }
@@ -208,7 +208,7 @@ spec:
 
               if (ccudPluginVersion) {
                   if (!settings.pluginManager.hasPlugin(CCUD_PLUGIN_ID)) {
-                      logger.quiet("Applying $CCUD_PLUGIN_CLASS via init script")
+                      logger.lifecycle("Applying $CCUD_PLUGIN_CLASS via init script")
                       settings.pluginManager.apply(initscript.classLoader.loadClass(CCUD_PLUGIN_CLASS))
                   }
               }
