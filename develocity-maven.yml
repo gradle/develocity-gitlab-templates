@@ -6,9 +6,9 @@ spec:
     # Maven remote repository to download extension jars from
     mavenRepo:
       default: 'https://repo1.maven.org/maven2'
-    # Gradle Enterprise Maven extension version
+    # Develocity Maven extension version
     mavenExtensionVersion:
-      default: '1.20'
+      default: '1.21'
     # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
     ccudMavenExtensionVersion:
       default: '1.13'
