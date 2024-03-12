@@ -46,6 +46,26 @@ function test_isAtLeast_Ignore_Qualifier() {
   assert "$actual" "$expected"
 }
 
+function test_downloadMavenExtension_GradleEnterprise() {
+  local mavenRepo="https://repo.grdev.net/artifactory/public"
+  local mavenExtensionVersion="1.17"
+  local TMP_GE=$buildDir
+  downloadDvMavenExt
+  echo "test_downloadMavenExtension_GradleEnterprise: $DEVELOCITY_EXT_PATH"
+  assert "$DEVELOCITY_EXT_PATH" "$buildDir/gradle-enterprise-maven-extension.jar"
+  DEVELOCITY_EXT_PATH="/path/to/gradle-enterprise-maven-extension.jar"
+}
+
+function test_downloadMavenExtension_Develocity() {
+  local mavenRepo="https://repo.grdev.net/artifactory/public"
+  local mavenExtensionVersion="1.21-rc-4"
+  local TMP_GE=$buildDir
+  downloadDvMavenExt
+  echo "test_downloadMavenExtension_Develocity: $DEVELOCITY_EXT_PATH"
+  assert "$DEVELOCITY_EXT_PATH" "$buildDir/develocity-maven-extension.jar"
+  DEVELOCITY_EXT_PATH="/path/to/gradle-enterprise-maven-extension.jar"
+}
+
 function test_detectExtension_detected() {
     local projDir=$(setupProject)
     cat << EOF >"${projDir}/.mvn/extensions.xml"
@@ -339,6 +359,8 @@ test_isAtLeast_Smaller
 test_isAtLeast_Minor_And_Patch_Larger
 test_isAtLeast_Minor_And_Patch_Smaller
 test_isAtLeast_Ignore_Qualifier
+test_downloadMavenExtension_GradleEnterprise
+test_downloadMavenExtension_Develocity
 test_detectExtension_detected
 test_detectExtension_notDetected
 test_detectExtension_notDetected_junk

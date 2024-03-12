@@ -59,8 +59,14 @@ spec:
   }
 
   function downloadDvMavenExt() {
-    local ext_path="${TMP_GE}/gradle-enterprise-maven-extension.jar"
-    curl -s "${mavenRepo}/com/gradle/gradle-enterprise-maven-extension/${mavenExtensionVersion}/gradle-enterprise-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"
+    local ext_path
+    if [ "$(isAtLeast $mavenExtensionVersion 1.21)" -eq "1" ]; then
+      ext_path="${TMP_GE}/develocity-maven-extension.jar"
+      curl -s "${mavenRepo}/com/gradle/develocity-maven-extension/${mavenExtensionVersion}/develocity-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"     
+    else
+      ext_path="${TMP_GE}/gradle-enterprise-maven-extension.jar"
+      curl -s "${mavenRepo}/com/gradle/gradle-enterprise-maven-extension/${mavenExtensionVersion}/gradle-enterprise-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"
+    fi
     export DEVELOCITY_EXT_PATH="${ext_path}"
   }
 
