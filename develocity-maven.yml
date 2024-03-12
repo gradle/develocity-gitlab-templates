@@ -76,7 +76,7 @@ spec:
     local mavenExtClasspath=''
     local appliedCustomDv="false"
     local appliedCustomCcud="false"
-    local appliedCustomDv=$(detectExtension "${rootDir}" "$(dvCoordinates)")
+    local appliedCustomDv=$(detectDvExtension "${rootDir}")
     if [ "${appliedCustomDv}" = "false" ]
     then
       mavenExtClasspath="${DEVELOCITY_EXT_PATH}"
@@ -104,14 +104,18 @@ spec:
     local existingMavenOpts=$(if [ ! -z "$MAVEN_OPTS" ]; then echo "${MAVEN_OPTS} "; else echo ''; fi)
     export MAVEN_OPTS=${existingMavenOpts}${mavenOpts}
   }
-
-  function dvCoordinates() {
-    local coordinates='com.gradle:gradle-enterprise-maven-extension'
+  
+  function detectDvExtension() {
     if [ ! -z "${customMavenExtensionCoordinates}" ]
     then
-      coordinates="${customMavenExtensionCoordinates}"
+      echo "$(detectExtension $1 $customMavenExtensionCoordinates)"
+    else
+      local appliedDefaultExtension="$(detectExtension $1 'com.gradle:gradle-enterprise-maven-extension')"
+      if [ "${appliedDefaultExtension}" = "false" ]; then
+        appliedDefaultExtension="$(detectExtension $1 'com.gradle:develocity-maven-extension')"
+      fi
+      echo "${appliedDefaultExtension}"
     fi
-    echo "${coordinates}"
   }
 
   function ccudCoordinates() {

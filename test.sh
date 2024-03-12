@@ -166,6 +166,89 @@ function test_detectExtension_unexisting() {
     assert $result "false"
 }
 
+function test_detectDvExtension_non_existing() {
+    local projDir=$(setupProject)
+    cat << EOF >"${projDir}/.mvn/extensions.xml"
+    <?xml version="1.0" encoding="UTF-8"?>
+    <extensions>
+        <extension>
+            <groupId>com.foo</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.0</version>
+        </extension>
+    </extensions>
+EOF
+
+    local result=$(detectDvExtension "${projDir}")
+    echo "test_detectDvExtension_non_existing: ${result}"
+    assert "${result}" "false"
+}
+
+function test_detectDvExtension_custom() {
+    local projDir=$(setupProject)
+    cat << EOF >"${projDir}/.mvn/extensions.xml"
+    <?xml version="1.0" encoding="UTF-8"?>
+    <extensions>
+        <extension>
+            <groupId>com.foo</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.0</version>
+        </extension>
+        <extension>
+            <groupId>com.gradle</groupId>
+            <artifactId>develocity-maven-extension</artifactId>
+            <version>1.21</version>
+        </extension>
+    </extensions>
+EOF
+
+    local customMavenExtensionCoordinates="com.foo:bar:1.0"
+    local result=$(detectDvExtension "${projDir}")
+    echo "test_detectDvExtension_custom: ${result}"
+    assert "${result}" "true"
+
+    customMavenExtensionCoordinates="com.foo:bar:2.0"
+    result=$(detectDvExtension "${projDir}")
+    echo "test_detectDvExtension_custom with wrong version: ${result}"
+    assert "${result}" "false"
+}
+
+function test_detectDvExtension_GradleEnterprise() {
+    local projDir=$(setupProject)
+    cat << EOF >"${projDir}/.mvn/extensions.xml"
+    <?xml version="1.0" encoding="UTF-8"?>
+    <extensions>
+        <extension>
+            <groupId>com.gradle</groupId>
+            <artifactId>gradle-enterprise-maven-extension</artifactId>
+            <version>1.20.1</version>
+        </extension>
+    </extensions>
+EOF
+
+    local result=$(detectDvExtension "${projDir}")
+    echo "test_detectDvExtension_GradleEnterprise: ${result}"
+    assert "${result}" "true"
+}
+
+function test_detectDvExtension_Develocity() {
+    local projDir=$(setupProject)
+    cat << EOF >"${projDir}/.mvn/extensions.xml"
+    <?xml version="1.0" encoding="UTF-8"?>
+    <extensions>
+        <extension>
+            <groupId>com.gradle</groupId>
+            <artifactId>develocity-maven-extension</artifactId>
+            <version>1.21</version>
+        </extension>
+    </extensions>
+EOF
+
+    local result=$(detectDvExtension "${projDir}")
+    echo "test_detectDvExtension_Develocity: ${result}"
+    assert "${result}" "true"
+}
+
 function test_inject_develocity_for_maven() {
     local projDir=$(setupProject)
     allowUntrustedServer=false
@@ -366,6 +449,10 @@ test_detectExtension_notDetected
 test_detectExtension_notDetected_junk
 test_detectExtension_unexisting
 test_detectExtension_multiple_detected
+test_detectDvExtension_non_existing
+test_detectDvExtension_custom
+test_detectDvExtension_GradleEnterprise
+test_detectDvExtension_Develocity
 test_inject_develocity_for_maven
 test_inject_develocity_for_maven_existing_maven_opts
 test_inject_develocity_for_maven_existing_extension
