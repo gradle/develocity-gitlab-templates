@@ -6,42 +6,42 @@ CCUD_EXT_PATH="/path/to/common-custom-user-data-maven-extension.jar"
 
 function test_isAtLeast_Larger() {
   local actual=$(isAtLeast 1.1 1.0)
-  local expected=1
+  local expected="true"
   echo "test_isAtLeast_Larger: actual = ${actual}; expected = ${expected}"
   assert "$actual" "$expected"
 }
 
 function test_isAtLeast_Equal() {
   local actual=$(isAtLeast 1.1 1.1)
-  local expected=1
+  local expected="true"
   echo "test_isAtLeast_Equal: actual = ${actual}; expected = ${expected}"
   assert "$actual" "$expected"
 }
 
 function test_isAtLeast_Smaller() {
   local actual=$(isAtLeast 1.1 1.2)
-  local expected=0
+  local expected="false"
   echo "test_isAtLeast_Smaller: actual = ${actual}; expected = ${expected}"
   assert "$actual" "$expected"
 }
 
 function test_isAtLeast_Minor_And_Patch_Larger() {
   local actual=$(isAtLeast 1.2 1.1.1)
-  local expected=1
+  local expected="true"
   echo "test_isAtLeast_Minor_And_Patch_Larger: actual = ${actual}; expected = ${expected}"
   assert "$actual" "$expected"
 }
 
 function test_isAtLeast_Minor_And_Patch_Smaller() {
   local actual=$(isAtLeast 1.2 1.2.1)
-  local expected=0
+  local expected="false"
   echo "test_isAtLeast_Minor_And_Patch_Larger: actual = ${actual}; expected = ${expected}"
   assert "$actual" "$expected"
 }
 
 function test_isAtLeast_Ignore_Qualifier() {
   local actual=$(isAtLeast 1.2-rc-4 1.2)
-  local expected=1
+  local expected="true"
   echo "test_isAtLeast_Ignore_Qualifier: actual = ${actual}; expected = ${expected}"
   assert "$actual" "$expected"
 }

@@ -46,9 +46,9 @@ spec:
     local v1=$(printf "%03d%03d%03d%03d" $(echo "$1" | cut -f1 -d"-" | tr '.' ' '));
     local v2=$(printf "%03d%03d%03d%03d" $(echo "$2" | cut -f1 -d"-" | tr '.' ' '));
     if [ "$v1" -eq "$v2" ] || [ "$v1" -gt "$v2" ]; then
-      echo 1;
+      echo "true";
     else
-      echo 0;
+      echo "false";
     fi
   }
 
@@ -60,7 +60,7 @@ spec:
 
   function downloadDvMavenExt() {
     local ext_path
-    if [ "$(isAtLeast $mavenExtensionVersion 1.21)" -eq "1" ]; then
+    if [ "$(isAtLeast $mavenExtensionVersion 1.21)" = "true" ]; then
       ext_path="${TMP_GE}/develocity-maven-extension.jar"
       curl -s "${mavenRepo}/com/gradle/develocity-maven-extension/${mavenExtensionVersion}/develocity-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"     
     else
