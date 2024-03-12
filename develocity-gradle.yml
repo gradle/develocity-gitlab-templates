@@ -9,6 +9,12 @@ spec:
     # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
     gradlePluginRepositoryUrl:
       default: ''
+    # Develocity Gradle plugin repository username
+    gradlePluginRepositoryUsername:
+      default: ''
+    # Develocity Gradle plugin repository password, strongly advised to pass a protected and masked variable
+    gradlePluginRepositoryPassword:
+      default: ''
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
@@ -49,6 +55,8 @@ spec:
           }
 
           def pluginRepositoryUrl = getInputParam('gradle.plugin-repository.url')
+          def pluginRepositoryUsername = getInputParam('gradle.plugin-repository.username')
+          def pluginRepositoryPassword = getInputParam('gradle.plugin-repository.password')
           def gePluginVersion = getInputParam('develocity.plugin.version')
           def ccudPluginVersion = getInputParam('develocity.ccud.plugin.version')
 
@@ -60,7 +68,19 @@ spec:
               logger.quiet("Gradle Enterprise plugins resolution: $pluginRepositoryUrl")
 
               repositories {
-                  maven { url pluginRepositoryUrl }
+                  maven {
+                      url pluginRepositoryUrl
+                      if (pluginRepositoryUsername && pluginRepositoryPassword) {
+                          logger.lifecycle("Using credentials for plugin repository")
+                          credentials {
+                              username(pluginRepositoryUsername)
+                              password(pluginRepositoryPassword)
+                          }
+                          authentication {
+                              basic(BasicAuthentication)
+                          }
+                      }
+                  }
               }
           }
 
@@ -229,6 +249,8 @@ spec:
     export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
     export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
     export "GRADLE_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
+    export "GRADLE_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
+    export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
   }
 
   create_gradle_init
