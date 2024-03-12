@@ -6,6 +6,9 @@ spec:
     # Develocity Plugin version
     gradlePluginVersion:
       default: '3.16.2'
+    # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
+    gradlePluginRepositoryUrl:
+      default: ''
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
@@ -45,7 +48,7 @@ spec:
               return
           }
 
-          def pluginRepositoryUrl = getInputParam('develocity.plugin-repository.url')
+          def pluginRepositoryUrl = getInputParam('gradle.plugin-repository.url')
           def gePluginVersion = getInputParam('develocity.plugin.version')
           def ccudPluginVersion = getInputParam('develocity.ccud.plugin.version')
 
@@ -225,6 +228,7 @@ spec:
     export "DEVELOCITY_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
     export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
     export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
+    export "GRADLE_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
   }
 
   create_gradle_init
