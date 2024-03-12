@@ -72,7 +72,7 @@ spec:
 
   function injectDevelocityForMaven() {
     local rootDir=$1
-    local mavenOpts="-Dgradle.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=${allowUntrustedServer}"
+    local mavenOpts="-Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=${allowUntrustedServer} -Ddevelocity.allowUntrustedServer=${allowUntrustedServer}"
     local mavenExtClasspath=''
     local appliedCustomDv="false"
     local appliedCustomCcud="false"
@@ -96,10 +96,10 @@ spec:
     fi
     if [[ ("${appliedCustomDv}" = "true" || "${appliedCustomCcud}" = "true") && "${enforceUrl}" = 'true' ]]
     then
-      mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url}"
+      mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
     elif [[ "${appliedCustomDv}" = "false" && "${appliedCustomCcud}" = "false" ]]
     then
-      mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url}"
+      mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
     fi
     local existingMavenOpts=$(if [ ! -z "$MAVEN_OPTS" ]; then echo "${MAVEN_OPTS} "; else echo ''; fi)
     export MAVEN_OPTS=${existingMavenOpts}${mavenOpts}
