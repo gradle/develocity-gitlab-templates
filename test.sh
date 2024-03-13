@@ -49,7 +49,7 @@ function test_isAtLeast_Ignore_Qualifier() {
 function test_downloadMavenExtension_GradleEnterprise() {
   local mavenRepo="https://repo.grdev.net/artifactory/public"
   local mavenExtensionVersion="1.17"
-  local TMP_GE=$buildDir
+  local TMP_DV=$buildDir
   downloadDvMavenExt
   echo "test_downloadMavenExtension_GradleEnterprise: $DEVELOCITY_EXT_PATH"
   assert "$DEVELOCITY_EXT_PATH" "$buildDir/gradle-enterprise-maven-extension.jar"
@@ -59,7 +59,7 @@ function test_downloadMavenExtension_GradleEnterprise() {
 function test_downloadMavenExtension_Develocity() {
   local mavenRepo="https://repo.grdev.net/artifactory/public"
   local mavenExtensionVersion="1.21-rc-4"
-  local TMP_GE=$buildDir
+  local TMP_DV=$buildDir
   downloadDvMavenExt
   echo "test_downloadMavenExtension_Develocity: $DEVELOCITY_EXT_PATH"
   assert "$DEVELOCITY_EXT_PATH" "$buildDir/develocity-maven-extension.jar"

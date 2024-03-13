@@ -39,7 +39,7 @@ spec:
 
   #functions-start
   function createTmp() {
-    export TMP_GE=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
+    export TMP_DV=$(mktemp -d develocity.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
   }
   
   function isAtLeast() {
@@ -54,7 +54,7 @@ spec:
   }
 
   function downloadDvCcudExt() {
-    local ext_path="${TMP_GE}/common-custom-user-data-maven-extension.jar"
+    local ext_path="${TMP_DV}/common-custom-user-data-maven-extension.jar"
     curl -s "${mavenRepo}/com/gradle/common-custom-user-data-maven-extension/${ccudMavenExtensionVersion}/common-custom-user-data-maven-extension-${ccudMavenExtensionVersion}.jar" -o "${ext_path}"
     export CCUD_EXT_PATH="${ext_path}"
   }
@@ -63,10 +63,10 @@ spec:
     local ext_path
     if [ "$(isAtLeast $mavenExtensionVersion 1.21)" = "true" ] 
     then
-      ext_path="${TMP_GE}/develocity-maven-extension.jar"
+      ext_path="${TMP_DV}/develocity-maven-extension.jar"
       curl -s "${mavenRepo}/com/gradle/develocity-maven-extension/${mavenExtensionVersion}/develocity-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"     
     else
-      ext_path="${TMP_GE}/gradle-enterprise-maven-extension.jar"
+      ext_path="${TMP_DV}/gradle-enterprise-maven-extension.jar"
       curl -s "${mavenRepo}/com/gradle/gradle-enterprise-maven-extension/${mavenExtensionVersion}/gradle-enterprise-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"
     fi
     export DEVELOCITY_EXT_PATH="${ext_path}"
