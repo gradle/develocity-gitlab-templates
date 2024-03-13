@@ -108,14 +108,15 @@ spec:
   }
   
   function detectDvExtension() {
+    local rootDir=$1
     if [ ! -z "${customMavenExtensionCoordinates}" ]
     then
-      echo "$(detectExtension $1 $customMavenExtensionCoordinates)"
+      echo "$(detectExtension $rootDir $customMavenExtensionCoordinates)"
     else
-      local appliedDefaultExtension="$(detectExtension $1 'com.gradle:gradle-enterprise-maven-extension')"
+      local appliedDefaultExtension="$(detectExtension $rootDir 'com.gradle:gradle-enterprise-maven-extension')"
       if [ "${appliedDefaultExtension}" = "false" ]
       then
-        appliedDefaultExtension="$(detectExtension $1 'com.gradle:develocity-maven-extension')"
+        appliedDefaultExtension="$(detectExtension $rootDir 'com.gradle:develocity-maven-extension')"
       fi
       echo "${appliedDefaultExtension}"
     fi
