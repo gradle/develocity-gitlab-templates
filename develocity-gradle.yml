@@ -26,10 +26,93 @@ spec:
       default: 'false'
 
 ---
+.build_scan_links_report:
+  artifacts:
+    reports:
+      annotations: $CI_PROJECT_DIR/build-scan-links.json
+
+.reportBuildScanLinks: |
+  function create_gradle_report_init() {
+    local init_script="${CI_PROJECT_DIR}/build-result-capture.init.gradle"
+    export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
+
+    cat > $init_script <<'EOF'
+      /*
+      * Capture information for each executed Gradle build to display in the job attached annotation.
+      */
+      import org.gradle.util.GradleVersion
+
+      // Only run against root build. Do not run against included builds.
+      def isTopLevelBuild = gradle.getParent() == null
+      if (isTopLevelBuild) {
+        def version = GradleVersion.current().baseVersion
+
+        def atLeastGradle3 = version >= GradleVersion.version("3.0")
+        def atLeastGradle6 = version >= GradleVersion.version("6.0")
+
+        if (atLeastGradle6) {
+          def useBuildService = version >= GradleVersion.version("6.6")
+          settingsEvaluated { settings ->
+            settings.pluginManager.withPlugin("com.gradle.enterprise") {
+              captureUsingBuildScanPublished(settings.extensions["gradleEnterprise"].buildScan, settings.rootProject)
+            }
+          }
+        } else if (atLeastGradle3) {
+          projectsEvaluated { gradle ->
+            gradle.rootProject.pluginManager.withPlugin("com.gradle.build-scan") {
+              captureUsingBuildScanPublished(gradle.rootProject.extensions["buildScan"], gradle.rootProject)
+            }
+          }
+        }
+      }
+
+      def captureUsingBuildScanPublished(buildScanExtension, rootProject) {
+        buildScanExtension.with {
+          buildScanPublished { buildScan ->
+            if (System.getenv("BUILD_SCAN_REPORT_PATH")) {
+              def reportFile = new File(System.getenv("BUILD_SCAN_REPORT_PATH"))
+              def report
+              // This might have been created by a previous Gradle invocation in the same GitLab job
+              // Note that we do not handle parallel Gradle scripts invocation, which should be a very edge case in context of a GitLab job
+              if (reportFile.exists()) {
+                report = new groovy.json.JsonSlurper().parseText(reportFile.text) as Report
+              } else {
+                report = new Report()
+              }
+              report.addLink("${buildScan.buildScanUri}")
+              def generator = new groovy.json.JsonGenerator.Options()
+                .excludeFieldsByName('contentHash', 'originalClassName')
+                .build()
+              reportFile.text = generator.toJson(report)
+            }
+          }
+        }
+      }
+
+      class Report {
+        List<Link> build_scans = []
+
+        void addLink(String url) {
+          build_scans << new Link(url)
+        }
+      }
+
+      class Link {
+        Map external_link
+
+        Link(String url) {
+          external_link = [ 'label': url, 'url': url ]
+        }
+      }
+  EOF
+
+    export DEVELOCITY_REPORT_INIT_SCRIPT_PATH="${init_script}"
+  }
+  create_gradle_report_init
+
 .injectDevelocityForGradle: |
   function create_gradle_init() {
-    local tmp_ge=$(mktemp -d ge.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
-    local init_script="${tmp_ge}/init-script.gradle"
+    local init_script="${CI_PROJECT_DIR}/init-script.gradle"
 
     cat > $init_script <<'EOF'
       import org.gradle.util.GradleVersion

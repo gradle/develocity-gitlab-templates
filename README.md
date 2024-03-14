@@ -36,6 +36,58 @@ For all other options see `inputs` section in [develocity-gradle.yml](develocity
 
 > **_NOTE:_** The build is also instrumented with our [Common Custom User Data Gradle plugin](https://github.com/gradle/common-custom-user-data-gradle-plugin) as well, as it will provide more details about your build.
 
+#### Build scan links
+An optional init script can be used to generate a report containing build scan links.
+This report can then be [attached](https://docs.gitlab.com/ee/ci/yaml/artifacts_reports.html#artifactsreportsannotations) to the job.
+Here's an example:
+
+```yml
+include:
+  - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/main/develocity-gradle.yml'
+    inputs:
+      url: https://develocity.mycompany.com
+
+build-gradle-job:
+  stage: build
+  script:
+    - !reference [.injectDevelocityForGradle]
+    # References the report script
+    - !reference [.reportBuildScanLinks]
+    # Pass it to each Gradle invocation
+    - ./gradlew clean -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+    # Attach the report
+  artifacts:
+    !reference [ .build_scan_links_report, artifacts ]
+```
+
+This shows the build scan links on the job details right panel:
+
+![links.png](images/links.png)
+
+Using GitLab templating, that can be factored and applied to multiple jobs:
+
+```yml
+.gradle-inject-job:
+    before_script:
+        - !reference [ .injectDevelocityForGradle ]
+        - !reference [ .reportBuildScanLinks ]
+    artifacts:
+        !reference [ .build_scan_links_report, artifacts ]
+
+build-gradle-job:
+    stage: build
+    extends: .gradle-inject-job
+    script:
+        - ./gradlew build -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+
+test-gradle-job:
+    stage: build
+    extends: .gradle-inject-job
+    script:
+        - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+```
+
 ### Maven Auto-instrumentation
 Include the remote template and optionally pass inputs.
 To enable Build Scan publishing for Maven builds, the configuration would look something like presented below (using https://develocity.mycompany.com as an example of Develocity server URL.
