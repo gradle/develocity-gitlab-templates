@@ -51,11 +51,8 @@ build-gradle-job:
   stage: build
   script:
     - !reference [.injectDevelocityForGradle]
-    # References the report script
-    - !reference [.reportBuildScanLinks]
-    # Pass it to each Gradle invocation
-    - ./gradlew clean -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
-    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+    - ./gradlew clean -I $DEVELOCITY_INIT_SCRIPT_PATH
+    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH
     # Attach the report
   artifacts:
     !reference [ .build_scan_links_report, artifacts ]
@@ -71,7 +68,6 @@ Using GitLab templating, that can be factored and applied to multiple jobs:
 .gradle-inject-job:
     before_script:
         - !reference [ .injectDevelocityForGradle ]
-        - !reference [ .reportBuildScanLinks ]
     artifacts:
         !reference [ .build_scan_links_report, artifacts ]
 
@@ -79,13 +75,13 @@ build-gradle-job:
     stage: build
     extends: .gradle-inject-job
     script:
-        - ./gradlew build -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+        - ./gradlew build -I $DEVELOCITY_INIT_SCRIPT_PATH
 
 test-gradle-job:
     stage: build
     extends: .gradle-inject-job
     script:
-        - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH -I $DEVELOCITY_REPORT_INIT_SCRIPT_PATH
+        - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH
 ```
 
 ### Maven Auto-instrumentation
