@@ -104,7 +104,7 @@ spec:
           external_link = [ 'label': url, 'url': url ]
         }
       }
-    EOF
+  EOF
   }
 
   function create_gradle_init() {
