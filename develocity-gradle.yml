@@ -31,9 +31,9 @@ spec:
     reports:
       annotations: $CI_PROJECT_DIR/build-scan-links.json
 
-.reportBuildScanLinks: |
+.injectDevelocityForGradle: |
   function create_gradle_report_init() {
-    local init_script="${CI_PROJECT_DIR}/build-result-capture.init.gradle"
+    local init_script="${CI_PROJECT_DIR}/build-result-capture.init.groovy"
     export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
 
     cat > $init_script <<'EOF'
@@ -104,13 +104,10 @@ spec:
           external_link = [ 'label': url, 'url': url ]
         }
       }
-  EOF
-
-    export DEVELOCITY_REPORT_INIT_SCRIPT_PATH="${init_script}"
+    EOF
   }
   create_gradle_report_init
 
-.injectDevelocityForGradle: |
   function create_gradle_init() {
     local init_script="${CI_PROJECT_DIR}/init-script.gradle"
 
@@ -297,6 +294,8 @@ spec:
               }
           }
       }
+
+      apply from: "${CI_PROJECT_DIR}/build-result-capture.init.groovy"
 
       void applyPluginExternally(PluginManager pluginManager, String pluginClassName) {
           def externallyApplied = 'gradle.enterprise.externally-applied'
