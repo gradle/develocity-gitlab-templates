@@ -106,7 +106,6 @@ spec:
       }
     EOF
   }
-  create_gradle_report_init
 
   function create_gradle_init() {
     local init_script="${CI_PROJECT_DIR}/init-script.gradle"
@@ -335,5 +334,6 @@ spec:
     export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
   }
 
+  create_gradle_report_init
   create_gradle_init
   inject_develocity_for_gradle
