@@ -36,8 +36,8 @@ For all other options see `inputs` section in [develocity-gradle.yml](develocity
 
 > **_NOTE:_** The build is also instrumented with our [Common Custom User Data Gradle plugin](https://github.com/gradle/common-custom-user-data-gradle-plugin) as well, as it will provide more details about your build.
 
-#### Build scan links
-An optional init script can be used to generate a report containing build scan links.
+#### Build Scan links
+An optional init script can be used to generate a report containing Build Scan links.
 This report can then be [attached](https://docs.gitlab.com/ee/ci/yaml/artifacts_reports.html#artifactsreportsannotations) to the job.
 Here's an example:
 
@@ -58,7 +58,7 @@ build-gradle-job:
     !reference [ .build_scan_links_report, artifacts ]
 ```
 
-This shows the build scan links on the job details right panel:
+This shows the Build Scan links on the job details right panel:
 
 ![links.png](images/links.png)
 
