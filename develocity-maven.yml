@@ -18,6 +18,9 @@ spec:
     # Enforce URL
     enforceUrl:
       default: 'true'
+    # Capture goal input files, if set it'll override what is already effective in the current project
+    captureGoalInputFiles:
+      default: 'true'
     # Will not inject the Develocity Maven extension if an extension with provided coordinates is found.
     # Expected format 'groupId:artifactId(:version)'
     mavenExtensionCustomCoordinates:
@@ -33,6 +36,7 @@ spec:
   mavenExtensionVersion=$[[ inputs.mavenExtensionVersion ]]
   allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]
   enforceUrl=$[[ inputs.enforceUrl ]]
+  captureGoalInputFiles=$[[ inputs.captureGoalInputFiles ]]
   customMavenExtensionCoordinates=$[[ inputs.mavenExtensionCustomCoordinates ]]
   customCcudCoordinates=$[[ inputs.ccudExtensionCustomCoordinates ]]
   url=$[[ inputs.url ]]
@@ -41,11 +45,11 @@ spec:
   function createTmp() {
     export TMP_DV=$(mktemp -d develocity.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
   }
-  
+
   function isAtLeast() {
     local v1=$(printf "%03d%03d%03d%03d" $(echo "$1" | cut -f1 -d"-" | tr '.' ' '))
     local v2=$(printf "%03d%03d%03d%03d" $(echo "$2" | cut -f1 -d"-" | tr '.' ' '))
-    if [ "$v1" -eq "$v2" ] || [ "$v1" -gt "$v2" ] 
+    if [ "$v1" -eq "$v2" ] || [ "$v1" -gt "$v2" ]
     then
       echo "true"
     else
@@ -61,10 +65,10 @@ spec:
 
   function downloadDvMavenExt() {
     local ext_path
-    if [ "$(isAtLeast $mavenExtensionVersion 1.21)" = "true" ] 
+    if [ "$(isAtLeast $mavenExtensionVersion 1.21)" = "true" ]
     then
       ext_path="${TMP_DV}/develocity-maven-extension.jar"
-      curl -s "${mavenRepo}/com/gradle/develocity-maven-extension/${mavenExtensionVersion}/develocity-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"     
+      curl -s "${mavenRepo}/com/gradle/develocity-maven-extension/${mavenExtensionVersion}/develocity-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"
     else
       ext_path="${TMP_DV}/gradle-enterprise-maven-extension.jar"
       curl -s "${mavenRepo}/com/gradle/gradle-enterprise-maven-extension/${mavenExtensionVersion}/gradle-enterprise-maven-extension-${mavenExtensionVersion}.jar" -o "${ext_path}"
@@ -103,10 +107,14 @@ spec:
     then
       mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
     fi
+    if [[ "${appliedCustomDv}" = "false" && ("${captureGoalInputFiles}" = "true" || "${captureGoalInputFiles}" = "false") ]]
+    then
+      mavenOpts="${mavenOpts} -Dgradle.scan.captureGoalInputFiles=${captureGoalInputFiles}"
+    fi
     local existingMavenOpts=$(if [ ! -z "$MAVEN_OPTS" ]; then echo "${MAVEN_OPTS} "; else echo ''; fi)
     export MAVEN_OPTS=${existingMavenOpts}${mavenOpts}
   }
-  
+
   function detectDvExtension() {
     local rootDir=$1
     if [ ! -z "${customMavenExtensionCoordinates}" ]
@@ -123,7 +131,7 @@ spec:
   }
 
   function ccudCoordinates() {
-    local coordinates='com.gradle:gradle-enterprise-maven-extension'
+    local coordinates='com.gradle:common-custom-user-data-maven-extension'
     if [ ! -z "${customCcudCoordinates}" ]
     then
       coordinates="${customCcudCoordinates}"

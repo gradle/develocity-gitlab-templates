@@ -346,6 +346,31 @@ EOF
     assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false"
 }
 
+function test_inject_develocity_for_maven_existing_default_ccud_extension() {
+    local projDir=$(setupProject)
+    cat << EOF >"${projDir}/.mvn/extensions.xml"
+      <?xml version="1.0" encoding="UTF-8"?>
+      <extensions>
+          <extension>
+              <groupId>com.gradle</groupId>
+              <artifactId>common-custom-user-data-maven-extension</artifactId>
+              <version>1.13</version>
+          </extension>
+      </extensions>
+EOF
+    allowUntrustedServer=false
+    customMavenExtensionCoordinates=""
+    customCcudCoordinates=""
+    url=https://localhost
+    enforceUrl=false
+    MAVEN_OPTS=""
+
+    injectDevelocityForMaven "${projDir}"
+
+    echo "test_inject_develocity_for_maven_existing_default_ccud_extension: ${MAVEN_OPTS}"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false"
+}
+
 function test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl() {
     local projDir=$(setupProject)
     cat << EOF >"${projDir}/.mvn/extensions.xml"
@@ -399,6 +424,58 @@ EOF
 
     echo "test_inject_develocity_for_maven_existing_dv_and_ccud_extension_enforceUrl: ${MAVEN_OPTS}"
     assert "${MAVEN_OPTS}" "-Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost"
+}
+
+function test_inject_capture_goal_input_files_true() {
+    local projDir=$(setupProject)
+    allowUntrustedServer=false
+    url=https://localhost
+    captureGoalInputFiles=true
+    MAVEN_OPTS=""
+
+    injectDevelocityForMaven "${projDir}"
+
+    echo "test_inject_capture_goal_input_files_true: ${MAVEN_OPTS}"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Dgradle.scan.captureGoalInputFiles=true"
+}
+
+function test_inject_capture_goal_input_files_false() {
+    local projDir=$(setupProject)
+    allowUntrustedServer=false
+    url=https://localhost
+    captureGoalInputFiles=false
+    MAVEN_OPTS=""
+
+    injectDevelocityForMaven "${projDir}"
+
+    echo "test_inject_capture_goal_input_files_false: ${MAVEN_OPTS}"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Dgradle.scan.captureGoalInputFiles=false"
+}
+
+function test_inject_capture_goal_input_files_existing_ext() {
+    local projDir=$(setupProject)
+        cat << EOF >"${projDir}/.mvn/extensions.xml"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <extensions>
+              <extension>
+                  <groupId>com.gradle</groupId>
+                  <artifactId>develocity-maven-extension</artifactId>
+                  <version>1.21</version>
+              </extension>
+          </extensions>
+EOF
+    allowUntrustedServer=false
+    customMavenExtensionCoordinates=""
+    customCcudCoordinates=""
+    url=https://localhost
+    MAVEN_OPTS=""
+    enforceUrl=false
+    captureGoalInputFiles=false
+
+    injectDevelocityForMaven "${projDir}"
+
+    echo "test_inject_capture_goal_input_files_existing_ext: ${MAVEN_OPTS}"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false"
 }
 
 function setupProject() {
@@ -458,5 +535,9 @@ test_inject_develocity_for_maven_existing_maven_opts
 test_inject_develocity_for_maven_existing_extension
 test_inject_develocity_for_maven_existing_extension_enforceUrl
 test_inject_develocity_for_maven_existing_ccud_extension
+test_inject_develocity_for_maven_existing_default_ccud_extension
 test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl
 test_inject_develocity_for_maven_existing_dv_and_ccud_extension_enforceUrl
+test_inject_capture_goal_input_files_true
+test_inject_capture_goal_input_files_false
+test_inject_capture_goal_input_files_existing_ext
