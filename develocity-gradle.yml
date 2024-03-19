@@ -18,7 +18,7 @@ spec:
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
-    # Capture task input files, if set it'll override what is already effective in the current project
+    # Capture task input files, only set if no Develocity plugin is already present
     captureTaskInputFiles:
       default: 'true'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)

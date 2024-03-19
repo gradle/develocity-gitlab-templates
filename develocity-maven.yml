@@ -18,7 +18,7 @@ spec:
     # Enforce URL
     enforceUrl:
       default: 'true'
-    # Capture goal input files, if set it'll override what is already effective in the current project
+    # Capture goal input files, only set if no Develocity extension is already present
     captureGoalInputFiles:
       default: 'true'
     # Will not inject the Develocity Maven extension if an extension with provided coordinates is found.
