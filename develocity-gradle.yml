@@ -18,6 +18,9 @@ spec:
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
+    # Capture task input files, only set if no Develocity plugin is already present
+    captureTaskInputFiles:
+      default: 'true'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
     ccudPluginVersion:
       default: '1.13'
@@ -205,6 +208,7 @@ spec:
 
       def geUrl = getInputParam('develocity.url')
       def geAllowUntrustedServer = Boolean.parseBoolean(getInputParam('develocity.allow-untrusted-server'))
+      def geCaptureTaskInputFiles = Boolean.parseBoolean(getInputParam('develocity.capture-task-input-files'))
       def geEnforceUrl = Boolean.parseBoolean(getInputParam('develocity.enforce-url'))
       def gePluginVersion = getInputParam('develocity.plugin.version')
       def ccudPluginVersion = getInputParam('develocity.ccud.plugin.version')
@@ -236,6 +240,14 @@ spec:
                           buildScan.publishAlways()
                           if (buildScan.metaClass.respondsTo(buildScan, 'setUploadInBackground', Boolean)) buildScan.uploadInBackground = false  // uploadInBackground not available for build-scan-plugin 1.16
                           buildScan.value CI_AUTO_INJECTION_CUSTOM_VALUE_NAME, CI_AUTO_INJECTION_CUSTOM_VALUE_VALUE
+                          if (isAtLeast(gePluginVersion, '2.1') && atLeastGradle5) {
+                              logger.lifecycle("Setting captureTaskInputFiles: $geCaptureTaskInputFiles")
+                              if (isAtLeast(gePluginVersion, '3.7')) {
+                                  buildScan.capture.taskInputFiles = geCaptureTaskInputFiles
+                              } else {
+                                  buildScan.captureTaskInputFiles = geCaptureTaskInputFiles
+                              }
+                          }
                       }
 
                       if (geUrl && geEnforceUrl) {
@@ -273,6 +285,14 @@ spec:
                           ext.buildScan.publishAlways()
                           ext.buildScan.uploadInBackground = false
                           ext.buildScan.value CI_AUTO_INJECTION_CUSTOM_VALUE_NAME, CI_AUTO_INJECTION_CUSTOM_VALUE_VALUE
+                          if (isAtLeast(gePluginVersion, '2.1')) {
+                              logger.lifecycle("Setting captureTaskInputFiles: $geCaptureTaskInputFiles")
+                              if (isAtLeast(gePluginVersion, '3.7')) {
+                                  ext.buildScan.capture.taskInputFiles = geCaptureTaskInputFiles
+                              } else {
+                                  ext.buildScan.captureTaskInputFiles = geCaptureTaskInputFiles
+                              }
+                          }
                       }
                   }
 
@@ -314,7 +334,11 @@ spec:
       }
 
       static boolean isNotAtLeast(String versionUnderTest, String referenceVersion) {
-          GradleVersion.version(versionUnderTest) < GradleVersion.version(referenceVersion)
+          !isAtLeast(versionUnderTest, referenceVersion)
+      }
+
+      static boolean isAtLeast(String versionUnderTest, String referenceVersion) {
+          GradleVersion.version(versionUnderTest) >= GradleVersion.version(referenceVersion)
       }
 
       apply from: "${System.getenv('CI_PROJECT_DIR')}/build-result-capture.init.groovy"
@@ -330,6 +354,7 @@ spec:
     export "DEVELOCITY_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
     export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
     export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
+    export "DEVELOCITY_CAPTURE_TASK_INPUT_FILES=$[[ inputs.captureTaskInputFiles ]]"
     export "GRADLE_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
     export "GRADLE_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
     export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
