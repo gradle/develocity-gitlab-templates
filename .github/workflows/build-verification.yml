@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Unit test
         id: test
-        run: ./test.sh
+        run: ./test_maven.sh
   verification:
     name: Smoke test on GitLab
     runs-on: ubuntu-latest
