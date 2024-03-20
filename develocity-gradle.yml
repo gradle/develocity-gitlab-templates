@@ -40,10 +40,8 @@ spec:
     export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
 
     cat > $init_script <<'EOF'
-      /*
-      * Capture information for each executed Gradle build to display in the job attached annotation.
-      */
       import org.gradle.util.GradleVersion
+      import java.util.concurrent.atomic.AtomicBoolean
 
       // Only run against root build. Do not run against included builds.
       def isTopLevelBuild = gradle.getParent() == null
@@ -52,41 +50,49 @@ spec:
 
         def atLeastGradle3 = version >= GradleVersion.version("3.0")
         def atLeastGradle6 = version >= GradleVersion.version("6.0")
+        def captureMarker = new AtomicBoolean(false)
 
         if (atLeastGradle6) {
-          def useBuildService = version >= GradleVersion.version("6.6")
           settingsEvaluated { settings ->
+            settings.pluginManager.withPlugin("com.gradle.develocity") {
+              captureUsingBuildScanPublished(settings.extensions["develocity"].buildScan, settings.rootProject, captureMarker)
+            }
             settings.pluginManager.withPlugin("com.gradle.enterprise") {
-              captureUsingBuildScanPublished(settings.extensions["gradleEnterprise"].buildScan, settings.rootProject)
+              captureUsingBuildScanPublished(settings.extensions["gradleEnterprise"].buildScan, settings.rootProject, captureMarker)
             }
           }
         } else if (atLeastGradle3) {
           projectsEvaluated { gradle ->
+            gradle.rootProject.pluginManager.withPlugin("com.gradle.develocity") {
+              captureUsingBuildScanPublished(gradle.rootProject.extensions["develocity"].buildScan, gradle.rootProject, captureMarker)
+            }
             gradle.rootProject.pluginManager.withPlugin("com.gradle.build-scan") {
-              captureUsingBuildScanPublished(gradle.rootProject.extensions["buildScan"], gradle.rootProject)
+              captureUsingBuildScanPublished(gradle.rootProject.extensions["buildScan"], gradle.rootProject, captureMarker)
             }
           }
         }
       }
 
-      def captureUsingBuildScanPublished(buildScanExtension, rootProject) {
-        buildScanExtension.with {
-          buildScanPublished { buildScan ->
-            if (System.getenv("BUILD_SCAN_REPORT_PATH")) {
-              def reportFile = new File(System.getenv("BUILD_SCAN_REPORT_PATH"))
-              def report
-              // This might have been created by a previous Gradle invocation in the same GitLab job
-              // Note that we do not handle parallel Gradle scripts invocation, which should be a very edge case in context of a GitLab job
-              if (reportFile.exists()) {
-                report = new groovy.json.JsonSlurper().parseText(reportFile.text) as Report
-              } else {
-                report = new Report()
+      def captureUsingBuildScanPublished(buildScanExtension, rootProject, AtomicBoolean captureMarker) {
+        if (captureMarker.compareAndSet(false, true)) {
+          buildScanExtension.with {
+            buildScanPublished { buildScan ->
+              if (System.getenv("BUILD_SCAN_REPORT_PATH")) {
+                def reportFile = new File(System.getenv("BUILD_SCAN_REPORT_PATH"))
+                def report
+                // This might have been created by a previous Gradle invocation in the same GitLab job
+                // Note that we do not handle parallel Gradle scripts invocation, which should be a very edge case in context of a GitLab job
+                if (reportFile.exists()) {
+                  report = new groovy.json.JsonSlurper().parseText(reportFile.text) as Report
+                } else {
+                  report = new Report()
+                }
+                report.addLink("${buildScan.buildScanUri}")
+                def generator = new groovy.json.JsonGenerator.Options()
+                  .excludeFieldsByName('contentHash', 'originalClassName')
+                  .build()
+                reportFile.text = generator.toJson(report)
               }
-              report.addLink("${buildScan.buildScanUri}")
-              def generator = new groovy.json.JsonGenerator.Options()
-                .excludeFieldsByName('contentHash', 'originalClassName')
-                .build()
-              reportFile.text = generator.toJson(report)
             }
           }
         }
