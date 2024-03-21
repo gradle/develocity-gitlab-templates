@@ -18,8 +18,8 @@ spec:
     # Enforce URL
     enforceUrl:
       default: 'true'
-    # Capture goal input files, only set if no Develocity extension is already present
-    captureGoalInputFiles:
+    # Capture file fingerprints, only set if no Develocity extension is already present
+    captureFileFingerprints:
       default: 'true'
     # Will not inject the Develocity Maven extension if an extension with provided coordinates is found.
     # Expected format 'groupId:artifactId(:version)'
@@ -36,7 +36,7 @@ spec:
   mavenExtensionVersion=$[[ inputs.mavenExtensionVersion ]]
   allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]
   enforceUrl=$[[ inputs.enforceUrl ]]
-  captureGoalInputFiles=$[[ inputs.captureGoalInputFiles ]]
+  captureFileFingerprints=$[[ inputs.captureFileFingerprints ]]
   customMavenExtensionCoordinates=$[[ inputs.mavenExtensionCustomCoordinates ]]
   customCcudCoordinates=$[[ inputs.ccudExtensionCustomCoordinates ]]
   url=$[[ inputs.url ]]
@@ -107,9 +107,9 @@ spec:
     then
       mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
     fi
-    if [[ "${appliedCustomDv}" = "false" && ("${captureGoalInputFiles}" = "true" || "${captureGoalInputFiles}" = "false") ]]
+    if [[ "${appliedCustomDv}" = "false" && ("${captureFileFingerprints}" = "true" || "${captureFileFingerprints}" = "false") ]]
     then
-      mavenOpts="${mavenOpts} -Dgradle.scan.captureGoalInputFiles=${captureGoalInputFiles}"
+        mavenOpts="${mavenOpts} -Ddevelocity.scan.captureFileFingerprints=${captureFileFingerprints} -Dgradle.scan.captureGoalInputFiles=${captureFileFingerprints}"
     fi
     local existingMavenOpts=$(if [ ! -z "$MAVEN_OPTS" ]; then echo "${MAVEN_OPTS} "; else echo ''; fi)
     export MAVEN_OPTS=${existingMavenOpts}${mavenOpts}
