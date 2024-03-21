@@ -18,8 +18,8 @@ spec:
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
-    # Capture task input files, only set if no Develocity plugin is already present
-    captureTaskInputFiles:
+    # Capture file fingerprints, only set if no Develocity plugin is already present
+    captureFileFingerprints:
       default: 'true'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
     ccudPluginVersion:
@@ -501,7 +501,7 @@ spec:
     export "DEVELOCITY_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
     export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
     export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
-    export "DEVELOCITY_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureTaskInputFiles ]]"
+    export "DEVELOCITY_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureFileFingerprints ]]"
     export "GRADLE_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
     export "GRADLE_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
     export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
