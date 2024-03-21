@@ -109,12 +109,7 @@ spec:
     fi
     if [[ "${appliedCustomDv}" = "false" && ("${captureFileFingerprints}" = "true" || "${captureFileFingerprints}" = "false") ]]
     then
-      if [ "$(isAtLeast $mavenExtensionVersion 1.21)" = "true" ]
-      then
-        mavenOpts="${mavenOpts} -Ddevelocity.scan.captureFileFingerprints=${captureFileFingerprints}"
-      else
-        mavenOpts="${mavenOpts} -Dgradle.scan.captureGoalInputFiles=${captureFileFingerprints}"
-      fi
+        mavenOpts="${mavenOpts} -Ddevelocity.scan.captureFileFingerprints=${captureFileFingerprints} -Dgradle.scan.captureGoalInputFiles=${captureFileFingerprints}"
     fi
     local existingMavenOpts=$(if [ ! -z "$MAVEN_OPTS" ]; then echo "${MAVEN_OPTS} "; else echo ''; fi)
     export MAVEN_OPTS=${existingMavenOpts}${mavenOpts}
