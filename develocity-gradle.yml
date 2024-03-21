@@ -302,7 +302,7 @@ spec:
                           if (isAtLeast(develocityPluginVersion, '2.1') && atLeastGradle5) {
                               logger.lifecycle("Setting file fingerprint capturing: $develocityCaptureFileFingerprints")
                               if (isAtLeast(develocityPluginVersion, '3.17')) {
-                                  buildScanExtension.capture.fileFingerprints = develocityCaptureFileFingerprints
+                                  buildScanExtension.capture.fileFingerprints.set(develocityCaptureFileFingerprints)
                               } else if (isAtLeast(develocityPluginVersion, '3.7')) {
                                   buildScanExtension.capture.taskInputFiles = develocityCaptureFileFingerprints
                               } else {
