@@ -78,6 +78,7 @@ function test_detectExtension_detected() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
     local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
@@ -117,6 +118,7 @@ function test_detectExtension_multiple_detected() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
     local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
@@ -136,6 +138,7 @@ function test_detectExtension_notDetected() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
     local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
@@ -150,6 +153,7 @@ function test_detectExtension_notDetected_junk() {
     <foo>
     </foo>
 EOF
+    setupVars
 
     local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
@@ -159,6 +163,7 @@ EOF
 
 function test_detectExtension_unexisting() {
     local projDir=$(setupProject)
+    setupVars
 
     local result=$(detectExtension "${projDir}" "com.gradle:develocity-maven-extension")
 
@@ -178,6 +183,7 @@ function test_detectDvExtension_non_existing() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
     local result=$(detectDvExtension "${projDir}")
     echo "test_detectDvExtension_non_existing: ${result}"
@@ -201,8 +207,9 @@ function test_detectDvExtension_custom() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
-    local customMavenExtensionCoordinates="com.foo:bar:1.0"
+    customMavenExtensionCoordinates="com.foo:bar:1.0"
     local result=$(detectDvExtension "${projDir}")
     echo "test_detectDvExtension_custom: ${result}"
     assert "${result}" "true"
@@ -225,6 +232,7 @@ function test_detectDvExtension_GradleEnterprise() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
     local result=$(detectDvExtension "${projDir}")
     echo "test_detectDvExtension_GradleEnterprise: ${result}"
@@ -243,6 +251,7 @@ function test_detectDvExtension_Develocity() {
         </extension>
     </extensions>
 EOF
+    setupVars
 
     local result=$(detectDvExtension "${projDir}")
     echo "test_detectDvExtension_Develocity: ${result}"
@@ -251,26 +260,23 @@ EOF
 
 function test_inject_develocity_for_maven() {
     local projDir=$(setupProject)
-    allowUntrustedServer=false
-    url=https://localhost
-    MAVEN_OPTS=""
+    setupVars
 
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Ddevelocity.scan.captureFileFingerprints=true"
 }
 
 function test_inject_develocity_for_maven_existing_maven_opts() {
     local projDir=$(setupProject)
-    allowUntrustedServer=false
-    url=https://localhost
+    setupVars
     MAVEN_OPTS="-Dfoo=bar"
 
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_maven_opts: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dfoo=bar -Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost"
+    assert "${MAVEN_OPTS}" "-Dfoo=bar -Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Ddevelocity.scan.captureFileFingerprints=true"
 }
 
 function test_inject_develocity_for_maven_existing_extension() {
@@ -285,11 +291,9 @@ function test_inject_develocity_for_maven_existing_extension() {
           </extension>
       </extensions>
 EOF
-    allowUntrustedServer=false
+    setupVars
     customMavenExtensionCoordinates="org.apache.maven.extensions:maven-enforcer-extension"
-    url=https://localhost
     enforceUrl=false
-    MAVEN_OPTS=""
 
     injectDevelocityForMaven "${projDir}"
 
@@ -309,10 +313,8 @@ function test_inject_develocity_for_maven_existing_extension_enforceUrl() {
           </extension>
       </extensions>
 EOF
-    allowUntrustedServer=false
+    setupVars
     customMavenExtensionCoordinates="org.apache.maven.extensions:maven-enforcer-extension"
-    url=https://localhost
-    MAVEN_OPTS=""
     enforceUrl=true
 
     injectDevelocityForMaven "${projDir}"
@@ -333,17 +335,14 @@ function test_inject_develocity_for_maven_existing_ccud_extension() {
           </extension>
       </extensions>
 EOF
-    allowUntrustedServer=false
-    customMavenExtensionCoordinates=""
+    setupVars
     customCcudCoordinates="org.apache.maven.extensions:maven-enforcer-extension"
-    url=https://localhost
     enforceUrl=false
-    MAVEN_OPTS=""
 
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_ccud_extension: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Ddevelocity.scan.captureFileFingerprints=true"
 }
 
 function test_inject_develocity_for_maven_existing_default_ccud_extension() {
@@ -358,17 +357,13 @@ function test_inject_develocity_for_maven_existing_default_ccud_extension() {
           </extension>
       </extensions>
 EOF
-    allowUntrustedServer=false
-    customMavenExtensionCoordinates=""
-    customCcudCoordinates=""
-    url=https://localhost
+    setupVars
     enforceUrl=false
-    MAVEN_OPTS=""
 
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_default_ccud_extension: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Ddevelocity.scan.captureFileFingerprints=true"
 }
 
 function test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl() {
@@ -383,17 +378,14 @@ function test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl() {
           </extension>
       </extensions>
 EOF
-    allowUntrustedServer=false
-    customMavenExtensionCoordinates=""
+    setupVars
     customCcudCoordinates="org.apache.maven.extensions:maven-enforcer-extension"
-    url=https://localhost
     enforceUrl=true
-    MAVEN_OPTS=""
 
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Ddevelocity.scan.captureFileFingerprints=true"
 }
 
 function test_inject_develocity_for_maven_existing_dv_and_ccud_extension_enforceUrl() {
@@ -413,12 +405,10 @@ function test_inject_develocity_for_maven_existing_dv_and_ccud_extension_enforce
           </extension>
       </extensions>
 EOF
-    allowUntrustedServer=false
+    setupVars
     customMavenExtensionCoordinates="org.foo:bar-extension"
     customCcudCoordinates="org.apache.maven.extensions:maven-enforcer-extension"
-    url=https://localhost
     enforceUrl=true
-    MAVEN_OPTS=""
 
     injectDevelocityForMaven "${projDir}"
 
@@ -426,12 +416,11 @@ EOF
     assert "${MAVEN_OPTS}" "-Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost"
 }
 
-function test_inject_capture_goal_input_files_true() {
+function test_inject_capture_goal_input_files_true_old() {
     local projDir=$(setupProject)
-    allowUntrustedServer=false
-    url=https://localhost
-    captureGoalInputFiles=true
-    MAVEN_OPTS=""
+    setupVars
+    captureFileFingerprints=true
+    mavenExtensionVersion="1.20.1"
 
     injectDevelocityForMaven "${projDir}"
 
@@ -439,17 +428,26 @@ function test_inject_capture_goal_input_files_true() {
     assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Dgradle.scan.captureGoalInputFiles=true"
 }
 
+function test_inject_capture_goal_input_files_true() {
+    local projDir=$(setupProject)
+    setupVars
+    captureFileFingerprints=true
+
+    injectDevelocityForMaven "${projDir}"
+
+    echo "test_inject_capture_goal_input_files_true: ${MAVEN_OPTS}"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Ddevelocity.scan.captureFileFingerprints=true"
+}
+
 function test_inject_capture_goal_input_files_false() {
     local projDir=$(setupProject)
-    allowUntrustedServer=false
-    url=https://localhost
-    captureGoalInputFiles=false
-    MAVEN_OPTS=""
+    setupVars
+    captureFileFingerprints=false
 
     injectDevelocityForMaven "${projDir}"
 
     echo "test_inject_capture_goal_input_files_false: ${MAVEN_OPTS}"
-    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Dgradle.scan.captureGoalInputFiles=false"
+    assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/develocity-maven-extension.jar:/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false -Dgradle.enterprise.url=https://localhost -Ddevelocity.url=https://localhost -Ddevelocity.scan.captureFileFingerprints=false"
 }
 
 function test_inject_capture_goal_input_files_existing_ext() {
@@ -464,13 +462,9 @@ function test_inject_capture_goal_input_files_existing_ext() {
               </extension>
           </extensions>
 EOF
-    allowUntrustedServer=false
-    customMavenExtensionCoordinates=""
-    customCcudCoordinates=""
-    url=https://localhost
-    MAVEN_OPTS=""
+    setupVars
     enforceUrl=false
-    captureGoalInputFiles=false
+    captureFileFingerprints=false
 
     injectDevelocityForMaven "${projDir}"
 
@@ -486,12 +480,28 @@ function setupProject() {
     echo "${projDir}"
 }
 
+function setupVars() {
+    # Set the vars to default
+    MAVEN_OPTS=""
+    ccudMavenExtensionVersion=""
+    mavenRepo=""
+    mavenExtensionVersion="1.21"
+    allowUntrustedServer="false"
+    enforceUrl="true"
+    captureFileFingerprints="true"
+    customMavenExtensionCoordinates=""
+    customCcudCoordinates=""
+    url="https://localhost"
+}
+
+
 function assert() {
     local val=$1
     local expected=$2
     if [ ! "${val}" = "${expected}" ]
     then
-        echo "${val} not equal to expected ${expected}"
+        echo "Not equal to expected"
+        diff  <(echo "${val}" ) <(echo "${expected}")
         exit 1
     fi
 }
@@ -538,6 +548,7 @@ test_inject_develocity_for_maven_existing_ccud_extension
 test_inject_develocity_for_maven_existing_default_ccud_extension
 test_inject_develocity_for_maven_existing_ccud_extension_enforceUrl
 test_inject_develocity_for_maven_existing_dv_and_ccud_extension_enforceUrl
+test_inject_capture_goal_input_files_true_old
 test_inject_capture_goal_input_files_true
 test_inject_capture_goal_input_files_false
 test_inject_capture_goal_input_files_existing_ext
