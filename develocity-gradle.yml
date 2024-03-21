@@ -475,7 +475,7 @@ spec:
   }
 
   function inject_develocity_for_gradle() {
-    export "DEVELOCITY_INJECTION_ENABLED="true"
+    export "DEVELOCITY_INJECTION_ENABLED=true"
     export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
     export "DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE=GitLab"
     export "DEVELOCITY_URL=$[[ inputs.url ]]"
