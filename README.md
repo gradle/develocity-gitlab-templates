@@ -10,7 +10,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 
 
 ## Requirements
-- GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ee/ci/yaml/includes.html#define-inputs-for-configuration-added-with-include-beta).
+- GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ee/ci/yaml/inputs.html).
 - Shell with curl should be available on the executor
 - Network access to download from Maven central and from GitHub (those URLs can be customized, see [Configuration](#Configuration)
 
@@ -136,11 +136,11 @@ build-gradle-job:
 ### Auto-instrumentation compatibility
 The following sections list the compatibility of the instrumented Develocity Gradle plugin and Develocity Maven extension with the Develocity version based on the given build tool in use.
 #### For Gradle builds
-For Gradle builds the version used for the Develocity Gradle plugin can be defined with the `gradlePluginVersion` input. The compatibility of the specified version with Develocity can be found [here](https://docs.gradle.com/enterprise/compatibility/#gradle_enterprise_gradle_plugin).
+For Gradle builds the version used for the Develocity Gradle plugin can be defined with the `gradlePluginVersion` input. The compatibility of the specified version with Develocity can be found [here](https://docs.gradle.com/enterprise/compatibility/#develocity_gradle_plugin).
 For the Common Custom User Data Gradle plugin which is defined with the `ccudPluginVersion` input, you can see the compatibility of the specified version with the Develocity Gradle plugin [here](https://github.com/gradle/common-custom-user-data-gradle-plugin#version-compatibility).
 
 #### For Maven builds
-For Maven builds the version used for the Develocity Maven extension can be defined with the `mavenExtensionVersion` input. The compatibility of the specified version with Develocity can be found [here](https://docs.gradle.com/enterprise/maven-extension/#compatibility_with_apache_maven_and_gradle_enterprise).
+For Maven builds the version used for the Develocity Maven extension can be defined with the `mavenExtensionVersion` input. The compatibility of the specified version with Develocity can be found [here](https://docs.gradle.com/enterprise/maven-extension/#compatibility_with_apache_maven_and_develocity).
 For the Common Custom User Data Maven extension which is defined with the `ccudMavenExtensionVersion` input, you can see the compatibility of the specified version with the Develocity Maven extension [here](https://github.com/gradle/common-custom-user-data-maven-extension#version-compatibility).
 
 ## Authentication
