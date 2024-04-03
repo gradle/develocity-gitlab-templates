@@ -5,7 +5,7 @@ spec:
       default: 'https://scans.gradle.com'
     # Develocity Plugin version
     gradlePluginVersion:
-      default: '3.16.2'
+      default: '3.17'
     # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
     gradlePluginRepositoryUrl:
       default: ''
@@ -141,7 +141,7 @@ spec:
           if (requestedInitScriptName != initScriptName) {
               return
           }
-  
+
           // finish early if injection is disabled
           def gradleInjectionEnabled = getInputParam("develocity.injection-enabled")
           if (gradleInjectionEnabled != "true") {
@@ -203,13 +203,13 @@ spec:
       def GRADLE_ENTERPRISE_PLUGIN_ID = 'com.gradle.enterprise'
       def GRADLE_ENTERPRISE_PLUGIN_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterprisePlugin'
       def GRADLE_ENTERPRISE_EXTENSION_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterpriseExtension'
-  
+
       def DEVELOCITY_PLUGIN_ID = 'com.gradle.develocity'
       def DEVELOCITY_PLUGIN_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityPlugin'
       def DEVELOCITY_CONFIGURATION_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityConfiguration'
-  
+
       def SETTINGS_EXTENSION_CLASSES = [GRADLE_ENTERPRISE_EXTENSION_CLASS, DEVELOCITY_CONFIGURATION_CLASS]
-  
+
       def CI_AUTO_INJECTION_CUSTOM_VALUE_NAME = 'CI auto injection'
       def CCUD_PLUGIN_ID = 'com.gradle.common-custom-user-data-gradle-plugin'
       def CCUD_PLUGIN_CLASS = 'com.gradle.CommonCustomUserDataGradlePlugin'
@@ -230,7 +230,7 @@ spec:
           logger.quiet("Ignoring init script '${initScriptName}' as requested name '${requestedInitScriptName}' does not match")
           return
       }
-  
+
       // finish early if injection is disabled
       def gradleInjectionEnabled = getInputParam("develocity.injection-enabled")
       if (gradleInjectionEnabled != "true") {
@@ -247,11 +247,11 @@ spec:
       def buildScanTermsOfUseUrl = getInputParam('develocity.terms-of-use.url')
       def buildScanTermsOfUseAgree = getInputParam('develocity.terms-of-use.agree')
       def ciAutoInjectionCustomValueValue = getInputParam('develocity.auto-injection.custom-value')
-  
+
       def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
       def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
       def shouldApplyDevelocityPlugin = atLeastGradle5 && develocityPluginVersion && isAtLeast(develocityPluginVersion, '3.17')
-  
+
       def dvOrGe = { def dvValue, def geValue ->
           if (shouldApplyDevelocityPlugin) {
               return dvValue instanceof Closure<?> ? dvValue() : dvValue
@@ -314,7 +314,7 @@ spec:
                       if (develocityUrl && develocityEnforceUrl) {
                           logger.lifecycle("Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer")
                       }
-  
+
                       pluginManager.withPlugin(BUILD_SCAN_PLUGIN_ID) {
                           afterEvaluate {
                               if (develocityUrl && develocityEnforceUrl) {
@@ -322,13 +322,13 @@ spec:
                                   buildScan.allowUntrustedServer = develocityAllowUntrustedServer
                               }
                           }
-  
+
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               buildScan.termsOfServiceUrl = buildScanTermsOfUseUrl
                               buildScan.termsOfServiceAgree = buildScanTermsOfUseAgree
                           }
                       }
-  
+
                       pluginManager.withPlugin(DEVELOCITY_PLUGIN_ID) {
                           afterEvaluate {
                               if (develocityUrl && develocityEnforceUrl) {
@@ -336,7 +336,7 @@ spec:
                                   develocity.allowUntrustedServer = develocityAllowUntrustedServer
                               }
                           }
-  
+
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               develocity.buildScan.termsOfUseUrl = buildScanTermsOfUseUrl
                               develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
@@ -369,12 +369,12 @@ spec:
                               ext.allowUntrustedServer = develocityAllowUntrustedServer
                           }
                       }
-  
+
                       eachDevelocitySettingsExtension(settings, SETTINGS_EXTENSION_CLASSES) { ext ->
                           ext.buildScan.uploadInBackground = buildScanUploadInBackground
                           ext.buildScan.value CI_AUTO_INJECTION_CUSTOM_VALUE_NAME, ciAutoInjectionCustomValueValue
                       }
-  
+
                       logger.lifecycle("Setting file fingerprint capturing: $develocityCaptureFileFingerprints")
                       eachDevelocitySettingsExtension(settings, [GRADLE_ENTERPRISE_EXTENSION_CLASS]) { ext ->
                           ext.buildScan.publishAlways()
@@ -386,7 +386,7 @@ spec:
                               }
                           }
                       }
-  
+
                       eachDevelocitySettingsExtension(settings, [DEVELOCITY_CONFIGURATION_CLASS]) { ext ->
                           ext.buildScan.capture.fileFingerprints = develocityCaptureFileFingerprints
                       }
@@ -395,25 +395,25 @@ spec:
                   if (develocityUrl && develocityEnforceUrl) {
                       logger.lifecycle("Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer")
                   }
-  
+
                   eachDevelocitySettingsExtension(settings, [GRADLE_ENTERPRISE_EXTENSION_CLASS]) { ext ->
                       if (develocityUrl && develocityEnforceUrl) {
                           ext.server = develocityUrl
                           ext.allowUntrustedServer = develocityAllowUntrustedServer
                       }
-  
+
                       if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                           ext.buildScan.termsOfServiceUrl = buildScanTermsOfUseUrl
                           ext.buildScan.termsOfServiceAgree = buildScanTermsOfUseAgree
                       }
                   }
-  
+
                   eachDevelocitySettingsExtension(settings, [DEVELOCITY_CONFIGURATION_CLASS]) { ext ->
                       if (develocityUrl && develocityEnforceUrl) {
                           ext.server = develocityUrl
                           ext.allowUntrustedServer = develocityAllowUntrustedServer
                       }
-  
+
                       if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                           ext.buildScan.termsOfUseUrl = buildScanTermsOfUseUrl
                           ext.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
@@ -466,7 +466,7 @@ spec:
       static boolean isNotAtLeast(String versionUnderTest, String referenceVersion) {
           !isAtLeast(versionUnderTest, referenceVersion)
       }
-  
+
       apply from: "${System.getenv('CI_PROJECT_DIR')}/build-result-capture.init.groovy"
 
   EOF
