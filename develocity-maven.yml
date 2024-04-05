@@ -11,7 +11,7 @@ spec:
       default: '1.21'
     # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
     ccudMavenExtensionVersion:
-      default: '1.13'
+      default: '2.0'
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
