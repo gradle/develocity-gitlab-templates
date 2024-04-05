@@ -21,7 +21,7 @@ To enable Build Scan publishing for Gradle builds, the configuration would look 
 
 ```yml
 include:
-  - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.1.0/develocity-gradle.yml'
+  - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.2.0/develocity-gradle.yml'
     inputs:
       url: https://develocity.mycompany.com
 
@@ -90,7 +90,7 @@ To enable Build Scan publishing for Maven builds, the configuration would look s
 
 ```yml
 include:
-  - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.1.0/develocity-maven.yml'
+  - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.2.0/develocity-maven.yml'
     inputs:
       url: https://develocity.mycompany.com
 
@@ -113,10 +113,10 @@ If you have both Gradle and Maven builds in a pipeline, you can simply just incl
 
 ```yml
 include:
-  - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.1.0/develocity-gradle.yml"
+  - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.2.0/develocity-gradle.yml"
     inputs:
       url: https://develocity.mycompany.com
-  - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.1.0/develocity-maven.yml"
+  - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.2.0/develocity-maven.yml"
     inputs:
       url: https://develocity.mycompany.com
 
