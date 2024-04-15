@@ -15,6 +15,9 @@ spec:
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
+    # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
+    shortLivedTokensExpiry:
+      default: ''
     # Enforce URL
     enforceUrl:
       default: 'true'
@@ -35,6 +38,7 @@ spec:
   mavenRepo=$[[ inputs.mavenRepo ]]
   mavenExtensionVersion=$[[ inputs.mavenExtensionVersion ]]
   allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]
+  shortLivedTokensExpiry=$[[ inputs.shortLivedTokensExpiry ]]
   enforceUrl=$[[ inputs.enforceUrl ]]
   captureFileFingerprints=$[[ inputs.captureFileFingerprints ]]
   customMavenExtensionCoordinates=$[[ inputs.mavenExtensionCustomCoordinates ]]
@@ -176,9 +180,75 @@ spec:
     local IFS=\>
     read -d \< elementName value
   }
+
+  function createShortLivedToken() {
+    local allKeys="${GRADLE_ENTERPRISE_ACCESS_KEY:-${DEVELOCITY_ACCESS_KEY}}"
+    if [ -z "${allKeys}" ]
+    then
+      return 0
+    fi
+
+    local maxRetries=3
+    local retryInterval=1
+    local attempt=0
+
+    local serverUrl=${1}
+    local tokenUrl="${serverUrl}/api/auth/token"
+    local expiry="${2}"
+    local hostname=$(extractHostname "${serverUrl}")
+    local accessKey=$(extractAccessKey "${allKeys}" "${hostname}")
+
+    if [ ! -z "${accessKey}" ]
+    then
+      if [ ! -z "${expiry}" ]
+      then
+        tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
+      fi
+      while [ ${attempt} -le ${maxRetries} ]
+      do
+        local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
+        local status_code=$(tail -n1 <<<$response)
+        local shortLivedToken=$(head -n -1 <<<$response)
+        if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+        then
+          export DEVELOCITY_ACCESS_KEY="${hostname}=${shortLivedToken}"
+          export GRADLE_ENTERPRISE_ACCESS_KEY="${DEVELOCITY_ACCESS_KEY}"
+          return
+        elif [ "${status_code}" == "401" ]
+        then
+          >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
+          return
+        else
+          ((attempt++))
+          sleep ${retryInterval}
+        fi
+      done
+    else
+      >&2 echo "Could not create short lived access token, no access key matching given Develocity server hostname ${hostname}"
+    fi
+  }
+
+  function extractHostname() {
+    local url=$1
+    echo "${url}" | cut -d'/' -f3 | cut -d':' -f1
+  }
+
+  function extractAccessKey() {
+    local allKeys=$1
+    local hostname=$2
+      key="${allKeys#*$hostname=}"    # Remove everything before the host name and '='
+      if [ "${key}" == "${allKeys}" ] # if nothing has changed, it's not a match
+      then
+        echo ""
+      else
+        key="${key%%;*}"              # Remove everything after the first ';'
+        echo "$key"
+      fi
+  }
   #functions-end
 
   createTmp
   downloadDvCcudExt
   downloadDvMavenExt
+  createShortLivedToken "${url}" "${shortLivedTokensExpiry}"
   injectDevelocityForMaven "${PWD}"
