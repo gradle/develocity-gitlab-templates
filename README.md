@@ -10,6 +10,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 
 
 ## Requirements
+- Develocity 2024.1 or above
 - GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ee/ci/yaml/inputs.html).
 - Shell with curl should be available on the executor
 - Network access to download from Maven central and from GitHub (those URLs can be customized, see [Configuration](#Configuration)
@@ -147,6 +148,7 @@ For the Common Custom User Data Maven extension which is defined with the `ccudM
 To authenticate against the Develocity server, you should specify a masked environment variable named `DEVELOCITY_ACCESS_KEY`.
 See [here](https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-the-ui) on how to do this in GitLab UI.
 To generate a Develocity Access Key, you can check [Develocity Gradle plugin docs](https://docs.gradle.com/enterprise/gradle-plugin/#manual_access_key_configuration) and [Develocity Maven extension docs](https://docs.gradle.com/enterprise/maven-extension/#manual_access_key_configuration).
+A short-lived access token will be retrieved given the access key and will replace the `DEVELOCITY_ACCESS_KEY` variable.
 
 ## License
 This project is available under the [Apache License, Version 2.0](https://github.com/gradle/develocity-gitlab-templates/blob/main/LICENSE).
