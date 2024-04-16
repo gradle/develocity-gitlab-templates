@@ -4,8 +4,17 @@ spec:
     url:
       default: 'https://scans.gradle.com'
     # Develocity Plugin version
+    # Allow untrusted server
+    allowUntrustedServer:
+      default: 'false'
+    # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
+    shortLivedTokensExpiry:
+      default: ''
     gradlePluginVersion:
       default: '3.17.1'
+    # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
+    ccudPluginVersion:
+      default: '2.0'
     # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
     gradlePluginRepositoryUrl:
       default: ''
@@ -15,21 +24,12 @@ spec:
     # Develocity Gradle plugin repository password, strongly advised to pass a protected and masked variable
     gradlePluginRepositoryPassword:
       default: ''
-    # Enforce the url over any defined locally to the project
-    enforceUrl:
-      default: 'false'
     # Capture file fingerprints, only set if no Develocity plugin is already present
     captureFileFingerprints:
       default: 'true'
-    # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
-    ccudPluginVersion:
-      default: '2.0'
-    # Allow untrusted server
-    allowUntrustedServer:
+    # Enforce the url over any defined locally to the project
+    enforceUrl:
       default: 'false'
-    # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
-    shortLivedTokensExpiry:
-      default: ''
 
 ---
 .build_scan_links_report:

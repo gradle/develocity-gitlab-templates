@@ -3,24 +3,21 @@ spec:
     # Develocity server URL
     url:
       default: 'https://scans.gradle.com'
-    # Maven remote repository to download extension jars from
-    mavenRepo:
-      default: 'https://repo1.maven.org/maven2'
-    # Develocity Maven extension version
-    mavenExtensionVersion:
-      default: '1.21.1'
-    # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
-    ccudMavenExtensionVersion:
-      default: '2.0'
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
     # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
     shortLivedTokensExpiry:
       default: ''
-    # Enforce URL
-    enforceUrl:
-      default: 'true'
+    # Develocity Maven extension version
+    mavenExtensionVersion:
+      default: '1.21.1'
+    # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
+    ccudMavenExtensionVersion:
+      default: '2.0'
+    # Maven remote repository to download extension jars from
+    mavenRepo:
+      default: 'https://repo1.maven.org/maven2'
     # Capture file fingerprints, only set if no Develocity extension is already present
     captureFileFingerprints:
       default: 'true'
@@ -32,6 +29,9 @@ spec:
     # Expected format 'groupId:artifactId(:version)'
     ccudExtensionCustomCoordinates:
       default: ''
+    # Enforce URL
+    enforceUrl:
+      default: 'true'
 ---
 .injectDevelocityForMaven: |
   ccudMavenExtensionVersion=$[[ inputs.ccudMavenExtensionVersion ]]
