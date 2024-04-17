@@ -5,7 +5,7 @@ spec:
       default: 'https://scans.gradle.com'
     # Develocity Plugin version
     gradlePluginVersion:
-      default: '3.17.1'
+      default: '3.17.2'
     # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
     gradlePluginRepositoryUrl:
       default: ''
