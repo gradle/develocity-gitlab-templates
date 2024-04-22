@@ -473,6 +473,7 @@ EOF
 }
 
 function test_extract_hostname() {
+    echo "test_extract_hostname"
     local hostname=$(extractHostname "http://some-dv-server.gradle.com")
     assert "${hostname}" "some-dv-server.gradle.com"
 
@@ -491,11 +492,21 @@ function test_extract_hostname() {
 }
 
 function test_extract_access_key() {
+    echo "test_extract_access_key"
     local key=$(extractAccessKey "host1=key1;host2=key2;host3=key3" "host2")
     assert "${key}" "key2"
 
     key=$(extractAccessKey "host1=key1;host2=key2;host3=key3" "unknown")
     assert "${key}" ""
+}
+
+function test_single_key() {
+    echo "test_single_key"
+    local key=$(singleKey "host1=key1")
+    assert "${key}" "true"
+
+    key=$(singleKey "host1=key1;host2=key2;host3=key3")
+    assert "${key}" "false"
 }
 
 function setupProject() {
@@ -580,3 +591,4 @@ test_inject_capture_goal_input_files_false
 test_inject_capture_goal_input_files_existing_ext
 test_extract_hostname
 test_extract_access_key
+test_single_key
