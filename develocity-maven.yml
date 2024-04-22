@@ -34,7 +34,6 @@ spec:
       default: 'true'
 ---
 .injectDevelocityForMaven: |
-  set -x
   ccudMavenExtensionVersion=$[[ inputs.ccudMavenExtensionVersion ]]
   mavenRepo=$[[ inputs.mavenRepo ]]
   mavenExtensionVersion=$[[ inputs.mavenExtensionVersion ]]
@@ -193,7 +192,7 @@ spec:
     local expiry="${2}"
 
     local newAccessKey=""
-    if [[ "${enforceUrl}" == "true" || $(singleKey allKeys) == "true" ]]
+    if [[ "${enforceUrl}" == "true" || $(singleKey "${allKeys}") == "true" ]]
     then
       local hostname=$(extractHostname "${serverUrl}")
       local accessKey=$(extractAccessKey "${allKeys}" "${hostname}")
@@ -219,9 +218,9 @@ spec:
         then
           if [ -z "${newAccessKey}" ]
           then
-            newAccessKey="${hostname}=${token}"
+            newAccessKey="${host}=${token}"
           else
-            newAccessKey="${newAccessKey}${separator}${hostname}=${token}"
+            newAccessKey="${newAccessKey}${separator}${host}=${token}"
           fi
         fi
       done
