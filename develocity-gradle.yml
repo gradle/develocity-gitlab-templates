@@ -132,7 +132,7 @@ spec:
   EOF
   }
 
-  function create_gradle_init() {
+  function createGradleInit() {
     local init_script="${CI_PROJECT_DIR}/init-script.gradle"
 
     cat > $init_script <<'EOF'
