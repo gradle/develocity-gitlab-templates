@@ -104,7 +104,7 @@ spec:
     then
       mavenOpts="-Dmaven.ext.class.path=${mavenExtClasspath} ${mavenOpts}"
     fi
-    if [[ ("${appliedCustomDv}" = "true" || "${appliedCustomCcud}" = "true") && "${enforceUrl}" = 'true' ]]
+    if [[ ("${appliedCustomDv}" = "true" || "${appliedCustomCcud}" = "true") && "${enforceUrl}" = "true" ]]
     then
       mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
     elif [[ "${appliedCustomDv}" = "false" && "${appliedCustomCcud}" = "false" ]]
@@ -188,48 +188,58 @@ spec:
       return 0
     fi
 
-    local maxRetries=3
-    local retryInterval=1
-    local attempt=0
-
     local serverUrl=${1}
-    local tokenUrl="${serverUrl}/api/auth/token"
     local expiry="${2}"
-    local hostname=$(extractHostname "${serverUrl}")
-    local accessKey=$(extractAccessKey "${allKeys}" "${hostname}")
 
-    if [ ! -z "${accessKey}" ]
+    local newAccessKey=""
+    if [[ "${enforceUrl}" == "true" || $(singleKey allKeys) == "true" ]]
     then
-      if [ ! -z "${expiry}" ]
+      local hostname=$(extractHostname "${serverUrl}")
+      local accessKey=$(extractAccessKey "${allKeys}" "${hostname}")
+      local tokenUrl="${serverUrl}/api/auth/token"
+      if [ ! -z "${accessKey}" ]
       then
-        tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
+        local token=$(getShortLivedToken $tokenUrl $expiry $accessKey)
+        if [ ! -z "${token}" ]
+        then
+          newAccessKey="${hostname}=${token}"
+        fi
+      else
+        >&2 echo "Could not create short lived access token, no access key matching given Develocity server hostname ${hostname}"
       fi
-      while [ ${attempt} -le ${maxRetries} ]
-      do
-        local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
-        local status_code=$(tail -n1 <<<$response)
-        local shortLivedToken=$(head -n -1 <<<$response)
-        if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+    else
+      local separator=";"
+      IFS="${separator}" read -ra pairs <<< "${allKeys}"
+      for pair in "${pairs[@]}"; do
+        IFS='=' read -r host key <<< "$pair"
+        local tokenUrl="https://${host}/api/auth/token"
+        local token=$(getShortLivedToken $tokenUrl $expiry $key)
+        if [ ! -z "${token}" ]
         then
-          export DEVELOCITY_ACCESS_KEY="${hostname}=${shortLivedToken}"
-          export GRADLE_ENTERPRISE_ACCESS_KEY="${DEVELOCITY_ACCESS_KEY}"
-          return
-        elif [ "${status_code}" == "401" ]
-        then
-          >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
-          export DEVELOCITY_ACCESS_KEY=""
-          export GRADLE_ENTERPRISE_ACCESS_KEY=""
-          return
-        else
-          ((attempt++))
-          sleep ${retryInterval}
+          if [ -z "${newAccessKey}" ]
+          then
+            newAccessKey="${hostname}=${token}"
+          else
+            newAccessKey="${newAccessKey}${separator}${hostname}=${token}"
+          fi
         fi
       done
-    else
-      >&2 echo "Could not create short lived access token, no access key matching given Develocity server hostname ${hostname}"
     fi
-    export DEVELOCITY_ACCESS_KEY=""
-    export GRADLE_ENTERPRISE_ACCESS_KEY=""
+
+    export DEVELOCITY_ACCESS_KEY="${newAccessKey}"
+    export GRADLE_ENTERPRISE_ACCESS_KEY="${DEVELOCITY_ACCESS_KEY}"
+  }
+
+  function singleKey() {
+    local allKeys=$1
+    local separator=";"
+    IFS="${separator}" read -ra pairs <<< "${allKeys}"
+    if [ "${#pairs[@]}" -eq 1 ]
+    then
+      echo "true"
+    else
+      echo "false"
+    fi
   }
 
   function extractHostname() {
@@ -248,6 +258,38 @@ spec:
         key="${key%%;*}"              # Remove everything after the first ';'
         echo "$key"
       fi
+  }
+
+  function getShortLivedToken() {
+    local tokenUrl=$1
+    local expiry=$2
+    local accessKey=$3
+    local maxRetries=3
+    local retryInterval=1
+    local attempt=0
+
+    if [ ! -z "${expiry}" ]
+    then
+      tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
+    fi
+    while [ ${attempt} -le ${maxRetries} ]
+    do
+      local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
+      local status_code=$(tail -n1 <<< "${response}")
+      local shortLivedToken=$(head -n -1 <<< "${response}")
+      if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+      then
+        echo "${shortLivedToken}"
+        return
+      elif [ "${status_code}" == "401" ]
+      then
+        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
+        return
+      else
+        ((attempt++))
+        sleep ${retryInterval}
+      fi
+    done
   }
   #functions-end
 
