@@ -133,9 +133,9 @@ spec:
   }
 
   function createGradleInit() {
-    local init_script="${CI_PROJECT_DIR}/init-script.gradle"
+    local initScript="${CI_PROJECT_DIR}/init-script.gradle"
 
-    cat > $init_script <<'EOF'
+    cat > $initScript <<'EOF'
       import org.gradle.util.GradleVersion
 
       // note that there is no mechanism to share code between the initscript{} block and the main script, so some logic is duplicated
