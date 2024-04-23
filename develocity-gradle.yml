@@ -4,8 +4,17 @@ spec:
     url:
       default: 'https://scans.gradle.com'
     # Develocity Plugin version
+    # Allow untrusted server
+    allowUntrustedServer:
+      default: 'false'
+    # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
+    shortLivedTokensExpiry:
+      default: ''
     gradlePluginVersion:
       default: '3.17.2'
+    # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
+    ccudPluginVersion:
+      default: '2.0.1'
     # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
     gradlePluginRepositoryUrl:
       default: ''
@@ -15,17 +24,11 @@ spec:
     # Develocity Gradle plugin repository password, strongly advised to pass a protected and masked variable
     gradlePluginRepositoryPassword:
       default: ''
-    # Enforce the url over any defined locally to the project
-    enforceUrl:
-      default: 'false'
     # Capture file fingerprints, only set if no Develocity plugin is already present
     captureFileFingerprints:
       default: 'true'
-    # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
-    ccudPluginVersion:
-      default: '2.0.1'
-    # Allow untrusted server
-    allowUntrustedServer:
+    # Enforce the url over any defined locally to the project
+    enforceUrl:
       default: 'false'
 
 ---
@@ -35,11 +38,11 @@ spec:
       annotations: $CI_PROJECT_DIR/build-scan-links.json
 
 .injectDevelocityForGradle: |
-  function create_gradle_report_init() {
-    local init_script="${CI_PROJECT_DIR}/build-result-capture.init.groovy"
+  function createGradleReportInit() {
+    local initScript="${CI_PROJECT_DIR}/build-result-capture.init.groovy"
     export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
 
-    cat > $init_script <<'EOF'
+    cat > $initScript <<'EOF'
       import org.gradle.util.GradleVersion
       import java.util.concurrent.atomic.AtomicBoolean
 
@@ -129,10 +132,10 @@ spec:
   EOF
   }
 
-  function create_gradle_init() {
-    local init_script="${CI_PROJECT_DIR}/init-script.gradle"
+  function createGradleInit() {
+    local initScript="${CI_PROJECT_DIR}/init-script.gradle"
 
-    cat > $init_script <<'EOF'
+    cat > $initScript <<'EOF'
       import org.gradle.util.GradleVersion
 
       // note that there is no mechanism to share code between the initscript{} block and the main script, so some logic is duplicated
@@ -501,10 +504,121 @@ spec:
 
   EOF
 
-    export DEVELOCITY_INIT_SCRIPT_PATH="${init_script}"
+    export DEVELOCITY_INIT_SCRIPT_PATH="${initScript}"
   }
 
-  function inject_develocity_for_gradle() {
+  function createShortLivedToken() {
+    local allKeys="${GRADLE_ENTERPRISE_ACCESS_KEY:-${DEVELOCITY_ACCESS_KEY}}"
+    if [ -z "${allKeys}" ]
+    then
+      return 0
+    fi
+
+    local serverUrl=${1}
+    local expiry="${2}"
+
+    local newAccessKey=""
+    if [[ "${enforceUrl}" == "true" || $(singleKey "${allKeys}") == "true" ]]
+    then
+      local hostname=$(extractHostname "${serverUrl}")
+      local accessKey=$(extractAccessKey "${allKeys}" "${hostname}")
+      local tokenUrl="${serverUrl}/api/auth/token"
+      if [ ! -z "${accessKey}" ]
+      then
+        local token=$(getShortLivedToken $tokenUrl $expiry $accessKey)
+        if [ ! -z "${token}" ]
+        then
+          newAccessKey="${hostname}=${token}"
+        fi
+      else
+        >&2 echo "Could not create short lived access token, no access key matching given Develocity server hostname ${hostname}"
+      fi
+    else
+      local separator=";"
+      IFS="${separator}" read -ra pairs <<< "${allKeys}"
+      for pair in "${pairs[@]}"; do
+        IFS='=' read -r host key <<< "$pair"
+        local tokenUrl="https://${host}/api/auth/token"
+        local token=$(getShortLivedToken $tokenUrl $expiry $key)
+        if [ ! -z "${token}" ]
+        then
+          if [ -z "${newAccessKey}" ]
+          then
+            newAccessKey="${host}=${token}"
+          else
+            newAccessKey="${newAccessKey}${separator}${host}=${token}"
+          fi
+        fi
+      done
+    fi
+
+    export DEVELOCITY_ACCESS_KEY="${newAccessKey}"
+    export GRADLE_ENTERPRISE_ACCESS_KEY="${DEVELOCITY_ACCESS_KEY}"
+  }
+
+  function singleKey() {
+    local allKeys=$1
+    local separator=";"
+    IFS="${separator}" read -ra pairs <<< "${allKeys}"
+    if [ "${#pairs[@]}" -eq 1 ]
+    then
+      echo "true"
+    else
+      echo "false"
+    fi
+  }
+
+  function extractHostname() {
+    local url=$1
+    echo "${url}" | cut -d'/' -f3 | cut -d':' -f1
+  }
+
+  function extractAccessKey() {
+    local allKeys=$1
+    local hostname=$2
+    key="${allKeys#*$hostname=}"    # Remove everything before the host name and '='
+    if [ "${key}" == "${allKeys}" ] # if nothing has changed, it's not a match
+    then
+      echo ""
+    else
+      key="${key%%;*}"              # Remove everything after the first ';'
+      echo "$key"
+    fi
+  }
+
+  function getShortLivedToken() {
+    local tokenUrl=$1
+    local expiry=$2
+    local accessKey=$3
+    local maxRetries=3
+    local retryInterval=1
+    local attempt=0
+
+    if [ ! -z "${expiry}" ]
+    then
+      tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
+    fi
+    while [ ${attempt} -le ${maxRetries} ]
+    do
+      local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
+      local status_code=$(tail -n1 <<< "${response}")
+      local shortLivedToken=$(head -n -1 <<< "${response}")
+      if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+      then
+        echo "${shortLivedToken}"
+        return
+      elif [ "${status_code}" == "401" ]
+      then
+        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
+        return
+      else
+        ((attempt++))
+        sleep ${retryInterval}
+      fi
+    done
+  }
+
+  function injectDevelocityForGradle() {
     export "DEVELOCITY_INJECTION_ENABLED=true"
     export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
     export "DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE=GitLab"
@@ -519,6 +633,7 @@ spec:
     export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
   }
 
-  create_gradle_report_init
-  create_gradle_init
-  inject_develocity_for_gradle
+  createGradleReportInit
+  createGradleInit
+  createShortLivedToken "$[[ inputs.url ]]" "$[[ inputs.shortLivedTokensExpiry ]]"
+  injectDevelocityForGradle

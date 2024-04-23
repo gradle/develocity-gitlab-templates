@@ -472,6 +472,43 @@ EOF
     assert "${MAVEN_OPTS}" "-Dmaven.ext.class.path=/path/to/common-custom-user-data-maven-extension.jar -Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=false -Ddevelocity.allowUntrustedServer=false"
 }
 
+function test_extract_hostname() {
+    echo "test_extract_hostname"
+    local hostname=$(extractHostname "http://some-dv-server.gradle.com")
+    assert "${hostname}" "some-dv-server.gradle.com"
+
+    hostname=$(extractHostname "http://some-dv-server.gradle.com/somepath")
+    assert "${hostname}" "some-dv-server.gradle.com"
+
+    hostname=$(extractHostname "http://192.168.1.10")
+    assert "${hostname}" "192.168.1.10"
+
+    hostname=$(extractHostname "http://192.168.1.10:5086")
+    assert "${hostname}" "192.168.1.10"
+
+    # we do not handle this case for now
+    hostname=$(extractHostname "not_a_url")
+    assert "${hostname}" "not_a_url"
+}
+
+function test_extract_access_key() {
+    echo "test_extract_access_key"
+    local key=$(extractAccessKey "host1=key1;host2=key2;host3=key3" "host2")
+    assert "${key}" "key2"
+
+    key=$(extractAccessKey "host1=key1;host2=key2;host3=key3" "unknown")
+    assert "${key}" ""
+}
+
+function test_single_key() {
+    echo "test_single_key"
+    local key=$(singleKey "host1=key1")
+    assert "${key}" "true"
+
+    key=$(singleKey "host1=key1;host2=key2;host3=key3")
+    assert "${key}" "false"
+}
+
 function setupProject() {
     local projDir="$(mktemp -p ${buildDir} -d ge.XXXXXX)"
     local extDir="${projDir}/.mvn"
@@ -552,3 +589,6 @@ test_inject_capture_goal_input_files_true_old
 test_inject_capture_goal_input_files_true
 test_inject_capture_goal_input_files_false
 test_inject_capture_goal_input_files_existing_ext
+test_extract_hostname
+test_extract_access_key
+test_single_key
