@@ -1,0 +1,19 @@
+name: Generate GitLab templates from src
+
+on: 
+  push:
+    branches:
+    - main
+
+jobs:
+  build-gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        run: ./build.sh
+      - name: Commit & push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '[bot] Update develocity-gradle.yml from src'
