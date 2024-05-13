@@ -1,0 +1,86 @@
+      import org.gradle.util.GradleVersion
+      import java.util.concurrent.atomic.AtomicBoolean
+
+      def BUILD_SCAN_PLUGIN_ID = "com.gradle.build-scan"
+      def BUILD_SCAN_EXTENSION = "buildScan"
+      def DEVELOCITY_PLUGIN_ID = "com.gradle.develocity"
+      def DEVELOCITY_EXTENSION = "develocity"
+      def GE_PLUGIN_ID = "com.gradle.enterprise"
+      def GE_EXTENSION = "gradleEnterprise"
+
+      // Only run against root build. Do not run against included builds.
+      def isTopLevelBuild = gradle.getParent() == null
+      if (isTopLevelBuild) {
+        def version = GradleVersion.current().baseVersion
+
+        def atLeastGradle3 = version >= GradleVersion.version("3.0")
+        def atLeastGradle6 = version >= GradleVersion.version("6.0")
+        def captureMarker = new AtomicBoolean(false)
+
+        if (atLeastGradle6) {
+          settingsEvaluated { settings ->
+            settings.pluginManager.withPlugin(GE_PLUGIN_ID) {
+              // Only execute if develocity plugin isn't applied.
+              if (!settings.extensions.findByName(DEVELOCITY_EXTENSION)) {
+                captureUsingBuildScanPublished(settings.extensions[GE_EXTENSION].buildScan, settings.rootProject, captureMarker)
+              }
+            }
+            settings.pluginManager.withPlugin(DEVELOCITY_PLUGIN_ID) {
+              captureUsingBuildScanPublished(settings.extensions[DEVELOCITY_EXTENSION].buildScan, settings.rootProject, captureMarker)
+            }
+          }
+        } else if (atLeastGradle3) {
+          projectsEvaluated { gradle ->
+            gradle.rootProject.pluginManager.withPlugin(BUILD_SCAN_PLUGIN_ID) {
+              // Only execute if develocity plugin isn't applied.
+              if (!gradle.rootProject.extensions.findByName(DEVELOCITY_EXTENSION)) {
+                captureUsingBuildScanPublished(gradle.rootProject.extensions[BUILD_SCAN_EXTENSION], gradle.rootProject, captureMarker)
+              }
+            }
+            gradle.rootProject.pluginManager.withPlugin(DEVELOCITY_PLUGIN_ID) {
+              captureUsingBuildScanPublished(gradle.rootProject.extensions[DEVELOCITY_EXTENSION].buildScan, gradle.rootProject, captureMarker)
+            }
+          }
+        }
+      }
+
+      def captureUsingBuildScanPublished(buildScanExtension, rootProject, AtomicBoolean captureMarker) {
+        if (captureMarker.compareAndSet(false, true)) {
+          buildScanExtension.with {
+            buildScanPublished { buildScan ->
+              if (System.getenv("BUILD_SCAN_REPORT_PATH")) {
+                def reportFile = new File(System.getenv("BUILD_SCAN_REPORT_PATH"))
+                def report
+                // This might have been created by a previous Gradle invocation in the same GitLab job
+                // Note that we do not handle parallel Gradle scripts invocation, which should be a very edge case in context of a GitLab job
+                if (reportFile.exists()) {
+                  report = new groovy.json.JsonSlurper().parseText(reportFile.text) as Report
+                } else {
+                  report = new Report()
+                }
+                report.addLink("${buildScan.buildScanUri}")
+                def generator = new groovy.json.JsonGenerator.Options()
+                  .excludeFieldsByName('contentHash', 'originalClassName')
+                  .build()
+                reportFile.text = generator.toJson(report)
+              }
+            }
+          }
+        }
+      }
+
+      class Report {
+        List<Link> build_scans = []
+
+        void addLink(String url) {
+          build_scans << new Link(url)
+        }
+      }
+
+      class Link {
+        Map external_link
+
+        Link(String url) {
+          external_link = [ 'label': url, 'url': url ]
+        }
+      }
