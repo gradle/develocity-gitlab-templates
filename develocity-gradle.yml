@@ -45,23 +45,23 @@ spec:
     cat > $initScript <<'EOF'
       import org.gradle.util.GradleVersion
       import java.util.concurrent.atomic.AtomicBoolean
-
+      
       def BUILD_SCAN_PLUGIN_ID = "com.gradle.build-scan"
       def BUILD_SCAN_EXTENSION = "buildScan"
       def DEVELOCITY_PLUGIN_ID = "com.gradle.develocity"
       def DEVELOCITY_EXTENSION = "develocity"
       def GE_PLUGIN_ID = "com.gradle.enterprise"
       def GE_EXTENSION = "gradleEnterprise"
-
+      
       // Only run against root build. Do not run against included builds.
       def isTopLevelBuild = gradle.getParent() == null
       if (isTopLevelBuild) {
         def version = GradleVersion.current().baseVersion
-
+      
         def atLeastGradle3 = version >= GradleVersion.version("3.0")
         def atLeastGradle6 = version >= GradleVersion.version("6.0")
         def captureMarker = new AtomicBoolean(false)
-
+      
         if (atLeastGradle6) {
           settingsEvaluated { settings ->
             settings.pluginManager.withPlugin(GE_PLUGIN_ID) {
@@ -88,7 +88,7 @@ spec:
           }
         }
       }
-
+      
       def captureUsingBuildScanPublished(buildScanExtension, rootProject, AtomicBoolean captureMarker) {
         if (captureMarker.compareAndSet(false, true)) {
           buildScanExtension.with {
@@ -113,18 +113,18 @@ spec:
           }
         }
       }
-
+      
       class Report {
         List<Link> build_scans = []
-
+      
         void addLink(String url) {
           build_scans << new Link(url)
         }
       }
-
+      
       class Link {
         Map external_link
-
+      
         Link(String url) {
           external_link = [ 'label': url, 'url': url ]
         }
@@ -137,46 +137,46 @@ spec:
 
     cat > $initScript <<'EOF'
       import org.gradle.util.GradleVersion
-
+      
       // note that there is no mechanism to share code between the initscript{} block and the main script, so some logic is duplicated
-
+      
       // conditionally apply the Develocity plugin to the classpath so it can be applied to the build further down in this script
       initscript {
           def isTopLevelBuild = !gradle.parent
           if (!isTopLevelBuild) {
               return
           }
-
+      
           def getInputParam = { String name ->
               def envVarName = name.toUpperCase().replace('.', '_').replace('-', '_')
               return System.getProperty(name) ?: System.getenv(envVarName)
           }
-
+      
           def requestedInitScriptName = getInputParam('develocity.injection.init-script-name')
           def initScriptName = buildscript.sourceFile.name
           if (requestedInitScriptName != initScriptName) {
               return
           }
-
+      
           // finish early if injection is disabled
           def gradleInjectionEnabled = getInputParam("develocity.injection-enabled")
           if (gradleInjectionEnabled != "true") {
               return
           }
-
+      
           def pluginRepositoryUrl = getInputParam('gradle.plugin-repository.url')
           def pluginRepositoryUsername = getInputParam('gradle.plugin-repository.username')
           def pluginRepositoryPassword = getInputParam('gradle.plugin-repository.password')
           def develocityPluginVersion = getInputParam('develocity.plugin.version')
           def ccudPluginVersion = getInputParam('develocity.ccud-plugin.version')
-
+      
           def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
           def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
-
+      
           if (develocityPluginVersion || ccudPluginVersion && atLeastGradle4) {
               pluginRepositoryUrl = pluginRepositoryUrl ?: 'https://plugins.gradle.org/m2'
               logger.lifecycle("Develocity plugins resolution: $pluginRepositoryUrl")
-
+      
               repositories {
                   maven {
                       url pluginRepositoryUrl
@@ -193,7 +193,7 @@ spec:
                   }
               }
           }
-
+      
           dependencies {
               if (develocityPluginVersion) {
                   if (atLeastGradle5) {
@@ -206,49 +206,49 @@ spec:
                       classpath "com.gradle:build-scan-plugin:1.16"
                   }
               }
-
+      
               if (ccudPluginVersion && atLeastGradle4) {
                   classpath "com.gradle:common-custom-user-data-gradle-plugin:$ccudPluginVersion"
               }
           }
       }
-
+      
       def BUILD_SCAN_PLUGIN_ID = 'com.gradle.build-scan'
       def BUILD_SCAN_PLUGIN_CLASS = 'com.gradle.scan.plugin.BuildScanPlugin'
-
+      
       def GRADLE_ENTERPRISE_PLUGIN_ID = 'com.gradle.enterprise'
       def GRADLE_ENTERPRISE_PLUGIN_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterprisePlugin'
-
+      
       def DEVELOCITY_PLUGIN_ID = 'com.gradle.develocity'
       def DEVELOCITY_PLUGIN_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityPlugin'
-
+      
       def CI_AUTO_INJECTION_CUSTOM_VALUE_NAME = 'CI auto injection'
       def CCUD_PLUGIN_ID = 'com.gradle.common-custom-user-data-gradle-plugin'
       def CCUD_PLUGIN_CLASS = 'com.gradle.CommonCustomUserDataGradlePlugin'
-
+      
       def isTopLevelBuild = !gradle.parent
       if (!isTopLevelBuild) {
           return
       }
-
+      
       def getInputParam = { String name ->
           def envVarName = name.toUpperCase().replace('.', '_').replace('-', '_')
           return System.getProperty(name) ?: System.getenv(envVarName)
       }
-
+      
       def requestedInitScriptName = getInputParam('develocity.injection.init-script-name')
       def initScriptName = buildscript.sourceFile.name
       if (requestedInitScriptName != initScriptName) {
           logger.quiet("Ignoring init script '${initScriptName}' as requested name '${requestedInitScriptName}' does not match")
           return
       }
-
+      
       // finish early if injection is disabled
       def gradleInjectionEnabled = getInputParam("develocity.injection-enabled")
       if (gradleInjectionEnabled != "true") {
           return
       }
-
+      
       def develocityUrl = getInputParam('develocity.url')
       def develocityAllowUntrustedServer = Boolean.parseBoolean(getInputParam('develocity.allow-untrusted-server'))
       def develocityEnforceUrl = Boolean.parseBoolean(getInputParam('develocity.enforce-url'))
@@ -259,30 +259,30 @@ spec:
       def buildScanTermsOfUseUrl = getInputParam('develocity.terms-of-use.url')
       def buildScanTermsOfUseAgree = getInputParam('develocity.terms-of-use.agree')
       def ciAutoInjectionCustomValueValue = getInputParam('develocity.auto-injection.custom-value')
-
+      
       def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
       def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
       def shouldApplyDevelocityPlugin = atLeastGradle5 && develocityPluginVersion && isAtLeast(develocityPluginVersion, '3.17')
-
+      
       def dvOrGe = { def dvValue, def geValue ->
           if (shouldApplyDevelocityPlugin) {
               return dvValue instanceof Closure<?> ? dvValue() : dvValue
           }
           return geValue instanceof Closure<?> ? geValue() : geValue
       }
-
+      
       // finish early if configuration parameters passed in via system properties are not valid/supported
       if (ccudPluginVersion && isNotAtLeast(ccudPluginVersion, '1.7')) {
           logger.warn("Common Custom User Data Gradle plugin must be at least 1.7. Configured version is $ccudPluginVersion.")
           return
       }
-
+      
       // register buildScanPublished listener and optionally apply the Develocity plugin
       if (GradleVersion.current() < GradleVersion.version('6.0')) {
           rootProject {
               buildscript.configurations.getByName("classpath").incoming.afterResolve { ResolvableDependencies incoming ->
                   def resolutionResult = incoming.resolutionResult
-
+      
                   if (develocityPluginVersion) {
                       def scanPluginComponent = resolutionResult.allComponents.find {
                           it.moduleVersion.with { group == "com.gradle" && ['build-scan-plugin', 'gradle-enterprise-gradle-plugin', 'develocity-gradle-plugin'].contains(name) }
@@ -322,11 +322,11 @@ spec:
                               }
                           }
                       }
-
+      
                       if (develocityUrl && develocityEnforceUrl) {
                           logger.lifecycle("Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
                       }
-
+      
                       pluginManager.withPlugin(BUILD_SCAN_PLUGIN_ID) {
                           // Only execute if develocity plugin isn't applied.
                           if (gradle.rootProject.extensions.findByName("develocity")) return
@@ -336,13 +336,13 @@ spec:
                                   buildScan.allowUntrustedServer = develocityAllowUntrustedServer
                               }
                           }
-
+      
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               buildScan.termsOfServiceUrl = buildScanTermsOfUseUrl
                               buildScan.termsOfServiceAgree = buildScanTermsOfUseAgree
                           }
                       }
-
+      
                       pluginManager.withPlugin(DEVELOCITY_PLUGIN_ID) {
                           afterEvaluate {
                               if (develocityUrl && develocityEnforceUrl) {
@@ -350,14 +350,14 @@ spec:
                                   develocity.allowUntrustedServer = develocityAllowUntrustedServer
                               }
                           }
-
+      
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               develocity.buildScan.termsOfUseUrl = buildScanTermsOfUseUrl
                               develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
                           }
                       }
                   }
-
+      
                   if (ccudPluginVersion && atLeastGradle4) {
                       def ccudPluginComponent = resolutionResult.allComponents.find {
                           it.moduleVersion.with { group == "com.gradle" && name == "common-custom-user-data-gradle-plugin" }
@@ -383,12 +383,12 @@ spec:
                               ext.allowUntrustedServer = develocityAllowUntrustedServer
                           }
                       }
-
+      
                       eachDevelocitySettingsExtension(settings) { ext ->
                           ext.buildScan.uploadInBackground = buildScanUploadInBackground
                           ext.buildScan.value CI_AUTO_INJECTION_CUSTOM_VALUE_NAME, ciAutoInjectionCustomValueValue
                       }
-
+      
                       eachDevelocitySettingsExtension(settings,
                           { develocity ->
                               logger.lifecycle("Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
@@ -407,18 +407,18 @@ spec:
                           }
                       )
                   }
-
+      
                   if (develocityUrl && develocityEnforceUrl) {
                       logger.lifecycle("Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
                   }
-
+      
                   eachDevelocitySettingsExtension(settings,
                       { develocity ->
                           if (develocityUrl && develocityEnforceUrl) {
                               develocity.server = develocityUrl
                               develocity.allowUntrustedServer = develocityAllowUntrustedServer
                           }
-
+      
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               develocity.buildScan.termsOfUseUrl = buildScanTermsOfUseUrl
                               develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
@@ -429,7 +429,7 @@ spec:
                               gradleEnterprise.server = develocityUrl
                               gradleEnterprise.allowUntrustedServer = develocityAllowUntrustedServer
                           }
-
+      
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               gradleEnterprise.buildScan.termsOfServiceUrl = buildScanTermsOfUseUrl
                               gradleEnterprise.buildScan.termsOfServiceAgree = buildScanTermsOfUseAgree
@@ -437,7 +437,7 @@ spec:
                       }
                   )
               }
-
+      
               if (ccudPluginVersion) {
                   if (!settings.pluginManager.hasPlugin(CCUD_PLUGIN_ID)) {
                       logger.lifecycle("Applying $CCUD_PLUGIN_CLASS via init script")
@@ -446,7 +446,7 @@ spec:
               }
           }
       }
-
+      
       void applyPluginExternally(def pluginManager, String pluginClassName) {
           def externallyApplied = 'develocity.externally-applied'
           def externallyAppliedDeprecated = 'gradle.enterprise.externally-applied'
@@ -469,7 +469,7 @@ spec:
               }
           }
       }
-
+      
       /**
           * Apply the `dvAction` to all 'develocity' extensions.
           * If no 'develocity' extensions are found, apply the `geAction` to all 'gradleEnterprise' extensions.
@@ -478,7 +478,7 @@ spec:
       static def eachDevelocitySettingsExtension(def settings, def dvAction, def geAction = dvAction) {
           def GRADLE_ENTERPRISE_EXTENSION_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterpriseExtension'
           def DEVELOCITY_CONFIGURATION_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityConfiguration'
-
+      
           def dvExtensions = settings.extensions.extensionsSchema.elements
               .findAll { it.publicType.concreteClass.name == DEVELOCITY_CONFIGURATION_CLASS }
               .collect { settings[it.name] }
@@ -491,11 +491,11 @@ spec:
               geExtensions.each(geAction)
           }
       }
-
+      
       static boolean isAtLeast(String versionUnderTest, String referenceVersion) {
           GradleVersion.version(versionUnderTest) >= GradleVersion.version(referenceVersion)
       }
-
+      
       static boolean isNotAtLeast(String versionUnderTest, String referenceVersion) {
           !isAtLeast(versionUnderTest, referenceVersion)
       }
