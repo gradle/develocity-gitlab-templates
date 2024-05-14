@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir build
+mkdir -p build
 
 # Copy the init-scripts to the build directory and indent them for inclusion in the 'develocity-gradle.yml' file.
 sed -e 's/^/      /' src/gradle/init-scripts/build-result-capture.init.gradle > build/build-result-capture.init.gradle
