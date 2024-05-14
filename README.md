@@ -11,7 +11,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 
 ## Requirements
 > [!IMPORTANT]
-> Develocity 2024.1 or above is required starting from template 1.3.0 and above. See [here](#short-lived-access-tokens) for more infos.
+> Develocity 2024.1 or above is required starting from version `1.3.0` and above. See [here](#short-lived-access-tokens) for more infos.
 
 - GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ee/ci/yaml/inputs.html).
 - Shell with curl should be available on the executor
@@ -152,9 +152,10 @@ See [here](https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-th
 To generate a Develocity Access Key, you can check [Develocity Gradle plugin docs](https://docs.gradle.com/enterprise/gradle-plugin/#manual_access_key_configuration) and [Develocity Maven extension docs](https://docs.gradle.com/enterprise/maven-extension/#manual_access_key_configuration).
 
 ### Short-lived access tokens
-A short-lived access token will be retrieved given the access key and will replace the `DEVELOCITY_ACCESS_KEY` variable content.
-If a short-lived token fails to be retrieved (for example the Develocity server version is lower than 2024.1), no access key will be set.
-For more infos on short-lived token, see [Develocity API documentation](https://docs.gradle.com/develocity/api-manual/#short_lived_access_tokens).
+Develocity access keys are long-lived, creating risks if they are leaked. To avoid this, users can use short-lived access tokens to authenticate with Develocity. Access tokens can be used wherever an access key would be used. Access tokens are only valid for the Develocity instance that created them.
+If a short-lived token fails to be retrieved (for example, if the Develocity server version is lower than `2024.1`), no access key will be set.
+In that case, Develocity authenticated operations like build cache read/write and build scan publication will fail without failing the build.
+For more information on short-lived tokens, see [Develocity API documentation](https://docs.gradle.com/develocity/api-manual/#short_lived_access_tokens).
 
 
 ## License
