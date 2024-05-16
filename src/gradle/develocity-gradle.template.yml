@@ -38,26 +38,15 @@ spec:
       annotations: $CI_PROJECT_DIR/build-scan-links.json
 
 .injectDevelocityForGradle: |
-  function createGradleReportInit() {
-    local initScript="${CI_PROJECT_DIR}/build-result-capture.init.groovy"
-    export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
-
-    cat > $initScript <<'EOF'
-<<BUILD_RESULT_CAPTURE_INIT_GROOVY>>
-  EOF
-  }
-
   function createGradleInit() {
     local initScript="${CI_PROJECT_DIR}/init-script.gradle"
 
     cat > $initScript <<'EOF'
 <<DEVELOCITY_INJECTION_INIT_GRADLE>>
-
-      apply from: "${System.getenv('CI_PROJECT_DIR')}/build-result-capture.init.groovy"
-
   EOF
 
     export DEVELOCITY_INIT_SCRIPT_PATH="${initScript}"
+    export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
   }
 
   function createShortLivedToken() {
@@ -186,7 +175,6 @@ spec:
     export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
   }
 
-  createGradleReportInit
   createGradleInit
   createShortLivedToken "$[[ inputs.url ]]" "$[[ inputs.shortLivedTokensExpiry ]]"
   injectDevelocityForGradle
