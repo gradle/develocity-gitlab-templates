@@ -136,6 +136,11 @@ spec:
     local initScript="${CI_PROJECT_DIR}/init-script.gradle"
 
     cat > $initScript <<'EOF'
+      /*
+       * Initscript for injection of Develocity into Gradle builds.
+       * Version: v0.4.0
+       */
+      
       import org.gradle.util.GradleVersion
       
       // note that there is no mechanism to share code between the initscript{} block and the main script, so some logic is duplicated
@@ -147,8 +152,9 @@ spec:
               return
           }
       
+          def ENV_VAR_PREFIX = ''
           def getInputParam = { String name ->
-              def envVarName = name.toUpperCase().replace('.', '_').replace('-', '_')
+              def envVarName = ENV_VAR_PREFIX + name.toUpperCase().replace('.', '_').replace('-', '_')
               return System.getProperty(name) ?: System.getenv(envVarName)
           }
       
@@ -231,8 +237,9 @@ spec:
           return
       }
       
+      def ENV_VAR_PREFIX = ''
       def getInputParam = { String name ->
-          def envVarName = name.toUpperCase().replace('.', '_').replace('-', '_')
+          def envVarName = ENV_VAR_PREFIX + name.toUpperCase().replace('.', '_').replace('-', '_')
           return System.getProperty(name) ?: System.getenv(envVarName)
       }
       
@@ -277,7 +284,7 @@ spec:
           return
       }
       
-      // register buildScanPublished listener and optionally apply the Develocity plugin
+      // Conditionally apply and configure the Develocity plugin
       if (GradleVersion.current() < GradleVersion.version('6.0')) {
           rootProject {
               buildscript.configurations.getByName("classpath").incoming.afterResolve { ResolvableDependencies incoming ->
@@ -292,12 +299,12 @@ spec:
                           logger.lifecycle("Applying $pluginClass via init script")
                           applyPluginExternally(pluginManager, pluginClass)
                           def rootExtension = dvOrGe(
-                                  { develocity },
-                                  { buildScan }
+                              { develocity },
+                              { buildScan }
                           )
                           def buildScanExtension = dvOrGe(
-                                  { rootExtension.buildScan },
-                                  { rootExtension }
+                              { rootExtension.buildScan },
+                              { rootExtension }
                           )
                           if (develocityUrl) {
                               logger.lifecycle("Connection to Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
@@ -471,10 +478,10 @@ spec:
       }
       
       /**
-          * Apply the `dvAction` to all 'develocity' extensions.
-          * If no 'develocity' extensions are found, apply the `geAction` to all 'gradleEnterprise' extensions.
-          * (The develocity plugin creates both extensions, and we want to prefer configuring 'develocity').
-          */
+       * Apply the `dvAction` to all 'develocity' extensions.
+       * If no 'develocity' extensions are found, apply the `geAction` to all 'gradleEnterprise' extensions.
+       * (The develocity plugin creates both extensions, and we want to prefer configuring 'develocity').
+       */
       static def eachDevelocitySettingsExtension(def settings, def dvAction, def geAction = dvAction) {
           def GRADLE_ENTERPRISE_EXTENSION_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterpriseExtension'
           def DEVELOCITY_CONFIGURATION_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityConfiguration'
