@@ -1,6 +1,10 @@
 #!/bin/bash
 
 mkdir -p build
+# Common
+## Indent token script for inclusion in templates
+sed -e 's/^/  /' src/common/token.sh > build/token-indented.sh
+
 # Gradle templates
 ## Replace the 'BuildScanCollector' implementation in the reference init-script,
 ## and indent the init-script for inclusion in the 'develocity-gradle.yml' file.
@@ -20,7 +24,7 @@ sed -e '/<<DEVELOCITY_INJECTION_INIT_GRADLE>>/{
 
 ## Add the token script
 sed -e '/<<DEVELOCITY_INJECTION_SCRIPT_TOKEN>>/{
-    r src/common/token.sh
+    r build/token-indented.sh
     d
 }' build/develocity-gradle-without-token.yml > develocity-gradle.yml
 
@@ -43,7 +47,7 @@ sed -e '/<<DEVELOCITY_INJECTION_SCRIPT_MAVEN>>/{
 
 ## Include token script
 sed -e '/<<DEVELOCITY_INJECTION_SCRIPT_TOKEN>>/{
-    r src/common/token.sh
+    r build/token-indented.sh
     d
 }' build/develocity-maven-without-token.yml > develocity-maven.yml
 

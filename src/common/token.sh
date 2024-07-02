@@ -67,14 +67,14 @@ function extractHostname() {
 function extractAccessKey() {
   local allKeys=$1
   local hostname=$2
-    key="${allKeys#*$hostname=}"    # Remove everything before the host name and '='
-    if [ "${key}" == "${allKeys}" ] # if nothing has changed, it's not a match
-    then
-      echo ""
-    else
-      key="${key%%;*}"              # Remove everything after the first ';'
-      echo "$key"
-    fi
+  key="${allKeys#*$hostname=}"    # Remove everything before the host name and '='
+  if [ "${key}" == "${allKeys}" ] # if nothing has changed, it's not a match
+  then
+    echo ""
+  else
+    key="${key%%;*}"              # Remove everything after the first ';'
+    echo "$key"
+  fi
 }
 
 function getShortLivedToken() {

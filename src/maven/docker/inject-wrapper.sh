@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # interface of this script, should use corresponding env vars
-allowUntrustedServer=${ALLOW_UNTRUSTED_SERVER:-false}
-shortLivedTokensExpiry=${SHORT_LIVED_TOKEN_EXPIRY:-2}
-enforceUrl=${ENFORCE_URL:false}
-captureFileFingerprints=${CAPTURE_FILE_FINGERPRINTS:-true}
-customMavenExtensionCoordinates=${CUSTOM_MAVEN_EXTENSION_COORDINATES}
-customCcudCoordinates=${CUSTOM_CCUD_COORDINATES}
+allowUntrustedServer=${DEVELOCITY_ALLOW_UNTRUSTED_SERVER:-false}
+shortLivedTokensExpiry=${DEVELOCITY_SHORT_LIVED_TOKEN_EXPIRY:-2}
+enforceUrl=${DEVELOCITY_ENFORCE_URL:false}
+captureFileFingerprints=${DEVELOCITY_CAPTURE_FILE_FINGERPRINTS:-true}
+customMavenExtensionCoordinates=${DEVELOCITY_CUSTOM_MAVEN_EXTENSION_COORDINATES}
+customCcudCoordinates=${DEVELOCITY_CUSTOM_CCUD_COORDINATES}
 url=${DEVELOCITY_URL}
 
 function createTmp() {
@@ -212,14 +212,14 @@ function extractHostname() {
 function extractAccessKey() {
   local allKeys=$1
   local hostname=$2
-    key="${allKeys#*$hostname=}"    # Remove everything before the host name and '='
-    if [ "${key}" == "${allKeys}" ] # if nothing has changed, it's not a match
-    then
-      echo ""
-    else
-      key="${key%%;*}"              # Remove everything after the first ';'
-      echo "$key"
-    fi
+  key="${allKeys#*$hostname=}"    # Remove everything before the host name and '='
+  if [ "${key}" == "${allKeys}" ] # if nothing has changed, it's not a match
+  then
+    echo ""
+  else
+    key="${key%%;*}"              # Remove everything after the first ';'
+    echo "$key"
+  fi
 }
 
 function getShortLivedToken() {

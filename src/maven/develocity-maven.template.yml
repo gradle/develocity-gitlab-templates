@@ -46,6 +46,7 @@ spec:
   url=$[[ inputs.url ]]
 
   <<DEVELOCITY_INJECTION_SCRIPT_MAVEN>>
+
   <<DEVELOCITY_INJECTION_SCRIPT_TOKEN>>
 
   createTmp

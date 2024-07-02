@@ -504,10 +504,10 @@ spec:
     then
       return 0
     fi
-
+  
     local serverUrl=${1}
     local expiry="${2}"
-
+  
     local newAccessKey=""
     if [[ "${enforceUrl}" == "true" || $(singleKey "${allKeys}") == "true" ]]
     then
@@ -542,11 +542,11 @@ spec:
         fi
       done
     fi
-
+  
     export DEVELOCITY_ACCESS_KEY="${newAccessKey}"
     export GRADLE_ENTERPRISE_ACCESS_KEY="${DEVELOCITY_ACCESS_KEY}"
   }
-
+  
   function singleKey() {
     local allKeys=$1
     local separator=";"
@@ -558,12 +558,12 @@ spec:
       echo "false"
     fi
   }
-
+  
   function extractHostname() {
     local url=$1
     echo "${url}" | cut -d'/' -f3 | cut -d':' -f1
   }
-
+  
   function extractAccessKey() {
     local allKeys=$1
     local hostname=$2
@@ -576,7 +576,7 @@ spec:
       echo "$key"
     fi
   }
-
+  
   function getShortLivedToken() {
     local tokenUrl=$1
     local expiry=$2
@@ -584,7 +584,7 @@ spec:
     local maxRetries=3
     local retryInterval=1
     local attempt=0
-
+  
     if [ ! -z "${expiry}" ]
     then
       tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
@@ -592,18 +592,19 @@ spec:
     while [ ${attempt} -le ${maxRetries} ]
     do
       local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
-      local status_code=$(tail -n1 <<< "${response}")
+      local statusCode=$(tail -n1 <<< "${response}")
       local shortLivedToken=$(head -n -1 <<< "${response}")
-      if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+      if [[ "${statusCode}" == "200" && ! -z "${shortLivedToken}" ]]
       then
         echo "${shortLivedToken}"
         return
-      elif [ "${status_code}" == "401" ]
+      elif [[ "${statusCode}" == "401" || "${statusCode}" == "400" ]]
       then
-        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
+        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code=${statusCode}"
         return
       else
         ((attempt++))
+        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code=${statusCode} and response=${response}"
         sleep ${retryInterval}
       fi
     done
