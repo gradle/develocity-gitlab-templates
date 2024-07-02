@@ -1,4 +1,5 @@
-FROM maven:3.9.8
+ARG MAVEN_BASE_IMAGE_VERSION=3.9.8
+FROM maven:$MAVEN_BASE_IMAGE_VERSION
 
 # Build argument to customize extensions downloading
 ARG mavenRepo=https://repo1.maven.org/maven2

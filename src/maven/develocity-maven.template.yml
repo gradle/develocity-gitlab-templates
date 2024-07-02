@@ -45,7 +45,8 @@ spec:
   customCcudCoordinates=$[[ inputs.ccudExtensionCustomCoordinates ]]
   url=$[[ inputs.url ]]
 
-  <<DEVELOCITY_INJECTION_FUNC_MAVEN>>
+  <<DEVELOCITY_INJECTION_SCRIPT_MAVEN>>
+  <<DEVELOCITY_INJECTION_SCRIPT_TOKEN>>
 
   createTmp
   downloadDvCcudExt

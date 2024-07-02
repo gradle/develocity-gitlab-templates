@@ -8,7 +8,8 @@ customMavenExtensionCoordinates=${CUSTOM_MAVEN_EXTENSION_COORDINATES}
 customCcudCoordinates=${CUSTOM_CCUD_COORDINATES}
 url=${DEVELOCITY_URL}
 
-<<DEVELOCITY_INJECTION_FUNC_MAVEN>>
+<<DEVELOCITY_INJECTION_SCRIPT_MAVEN>>
+<<DEVELOCITY_INJECTION_SCRIPT_TOKEN>>
 
 createShortLivedToken "${url}" "${shortLivedTokensExpiry}"
 injectDevelocityForMaven "${PWD}"
