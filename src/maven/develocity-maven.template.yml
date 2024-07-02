@@ -1,0 +1,54 @@
+spec:
+  inputs:
+    # Develocity server URL
+    url:
+      default: 'https://scans.gradle.com'
+    # Allow untrusted server
+    allowUntrustedServer:
+      default: 'false'
+    # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
+    shortLivedTokensExpiry:
+      default: ''
+    # Develocity Maven extension version
+    mavenExtensionVersion:
+      default: '1.21.5'
+    # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
+    ccudMavenExtensionVersion:
+      default: '2.0'
+    # Maven remote repository to download extension jars from
+    mavenRepo:
+      default: 'https://repo1.maven.org/maven2'
+    # Capture file fingerprints, only set if no Develocity extension is already present
+    captureFileFingerprints:
+      default: 'true'
+    # Will not inject the Develocity Maven extension if an extension with provided coordinates is found.
+    # Expected format 'groupId:artifactId(:version)'
+    mavenExtensionCustomCoordinates:
+      default: ''
+    # Will not inject the CCUD extension if an extension with provided coordinates is found.
+    # Expected format 'groupId:artifactId(:version)'
+    ccudExtensionCustomCoordinates:
+      default: ''
+    # Enforce URL
+    enforceUrl:
+      default: 'true'
+---
+.injectDevelocityForMaven: |
+  ccudMavenExtensionVersion=$[[ inputs.ccudMavenExtensionVersion ]]
+  mavenRepo=$[[ inputs.mavenRepo ]]
+  mavenExtensionVersion=$[[ inputs.mavenExtensionVersion ]]
+  allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]
+  shortLivedTokensExpiry=$[[ inputs.shortLivedTokensExpiry ]]
+  enforceUrl=$[[ inputs.enforceUrl ]]
+  captureFileFingerprints=$[[ inputs.captureFileFingerprints ]]
+  customMavenExtensionCoordinates=$[[ inputs.mavenExtensionCustomCoordinates ]]
+  customCcudCoordinates=$[[ inputs.ccudExtensionCustomCoordinates ]]
+  url=$[[ inputs.url ]]
+
+  <<DEVELOCITY_INJECTION_FUNC_MAVEN>>
+
+  createTmp
+  downloadDvCcudExt
+  downloadDvMavenExt
+  createShortLivedToken "${url}" "${shortLivedTokensExpiry}"
+  injectDevelocityForMaven "${PWD}"
