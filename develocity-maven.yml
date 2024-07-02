@@ -82,7 +82,7 @@ spec:
 
   function injectDevelocityForMaven() {
     local rootDir=$1
-    local mavenOpts="-Dgradle.scan.uploadInBackground=false -Ddevelocity.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=${allowUntrustedServer} -Ddevelocity.allowUntrustedServer=${allowUntrustedServer}"
+    local mavenOpts="-Dgradle.scan.uploadInBackground=false -Ddevelocity.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=${allowUntrustedServer} -Ddevelocity.allowUntrustedServer=${allowUntrustedServer}"
     local mavenExtClasspath=''
     local appliedCustomDv="false"
     local appliedCustomCcud="false"
