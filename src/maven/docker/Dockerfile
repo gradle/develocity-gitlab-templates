@@ -15,7 +15,7 @@ ENV ENFORCE_URL=false
 ENV CUSTOM_MAVEN_EXTENSION_COORDINATES=""
 ENV CUSTOM_CCUD_COORDINATES=""
 
-# Internal env vars consumed by inject.sh
+# Internal env vars consumed by inject-wrapper.sh
 ENV DEVELOCITY_EXT_PATH=$extPath/gradle-enterprise-maven-extension-$mavenExtensionVersion.jar
 ENV CCUD_EXT_PATH=$extPath/common-custom-user-data-maven-extension-$ccudMavenExtensionVersion.jar
 
@@ -24,7 +24,7 @@ curl -v "${mavenRepo}/com/gradle/common-custom-user-data-maven-extension/${ccudM
 curl -v "${mavenRepo}/com/gradle/develocity-maven-extension/${mavenExtensionVersion}/develocity-maven-extension-${mavenExtensionVersion}.jar" -o "${DEVELOCITY_EXT_PATH}"
 EOF
 
-COPY inject.sh /inject.sh
-RUN chmod +x /inject.sh
+COPY inject-wrapper.sh /inject-wrapper.sh
+RUN chmod +x /inject-wrapper.sh
 
-ENTRYPOINT ["/inject.sh"]
+ENTRYPOINT ["/inject-wrapper.sh"]

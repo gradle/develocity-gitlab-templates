@@ -21,9 +21,15 @@ sed -e '/<<DEVELOCITY_INJECTION_INIT_GRADLE>>/{
 # Maven templates
 
 ## Indent script for inclusion in the 'develocity-maven.yml' file.
-sed -e 's/^/      /' src/maven/script/inject.sh > build/inject-indented.sh
+sed -e 's/^/  /' src/maven/script/inject.sh > build/inject-indented.sh
 
 sed -e '/<<DEVELOCITY_INJECTION_FUNC_MAVEN>>/{
     r build/inject-indented.sh
     d
-}' src/gradle/develocity-maven.template.yml > develocity-maven.yml
+}' src/maven/develocity-maven.template.yml > develocity-maven.yml
+
+## Construct wrapper script for the Dockerfile
+sed -e '/<<DEVELOCITY_INJECTION_FUNC_MAVEN>>/{
+    r src/maven/script/inject.sh
+    d
+}' src/maven/docker/inject-wrapper.template.sh > src/maven/docker/inject-wrapper.sh

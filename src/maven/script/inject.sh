@@ -1,6 +1,6 @@
 function createTmp() {
-    export TMP_DV=$(mktemp -d develocity.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
-  }
+  export TMP_DV=$(mktemp -d develocity.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
+}
 
 function isAtLeast() {
   local v1=$(printf "%03d%03d%03d%03d" $(echo "$1" | cut -f1 -d"-" | tr '.' ' '))
@@ -227,18 +227,19 @@ function getShortLivedToken() {
   while [ ${attempt} -le ${maxRetries} ]
   do
     local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
-    local status_code=$(tail -n1 <<< "${response}")
+    local statusCode=$(tail -n1 <<< "${response}")
     local shortLivedToken=$(head -n -1 <<< "${response}")
-    if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+    if [[ "${statusCode}" == "200" && ! -z "${shortLivedToken}" ]]
     then
       echo "${shortLivedToken}"
       return
-    elif [ "${status_code}" == "401" ]
+    elif [[ "${statusCode}" == "401" || "${statusCode}" == "400" ]]
     then
-      >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
+      >&2 echo "Develocity short lived token request failed ${serverUrl} with status code=${statusCode}"
       return
     else
       ((attempt++))
+      >&2 echo "Develocity short lived token request failed ${serverUrl} with status code=${statusCode} and response=${response}"
       sleep ${retryInterval}
     fi
   done

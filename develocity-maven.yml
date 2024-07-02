@@ -45,11 +45,10 @@ spec:
   customCcudCoordinates=$[[ inputs.ccudExtensionCustomCoordinates ]]
   url=$[[ inputs.url ]]
 
-  #functions-start
   function createTmp() {
     export TMP_DV=$(mktemp -d develocity.XXXXXX --tmpdir="${CI_PROJECT_DIR}")
   }
-
+  
   function isAtLeast() {
     local v1=$(printf "%03d%03d%03d%03d" $(echo "$1" | cut -f1 -d"-" | tr '.' ' '))
     local v2=$(printf "%03d%03d%03d%03d" $(echo "$2" | cut -f1 -d"-" | tr '.' ' '))
@@ -60,13 +59,13 @@ spec:
       echo "false"
     fi
   }
-
+  
   function downloadDvCcudExt() {
     local ext_path="${TMP_DV}/common-custom-user-data-maven-extension.jar"
     curl -s "${mavenRepo}/com/gradle/common-custom-user-data-maven-extension/${ccudMavenExtensionVersion}/common-custom-user-data-maven-extension-${ccudMavenExtensionVersion}.jar" -o "${ext_path}"
     export CCUD_EXT_PATH="${ext_path}"
   }
-
+  
   function downloadDvMavenExt() {
     local ext_path
     if [ "$(isAtLeast $mavenExtensionVersion 1.21)" = "true" ]
@@ -79,7 +78,7 @@ spec:
     fi
     export DEVELOCITY_EXT_PATH="${ext_path}"
   }
-
+  
   function injectDevelocityForMaven() {
     local rootDir=$1
     local mavenOpts="-Dgradle.scan.uploadInBackground=false -Ddevelocity.scan.uploadInBackground=false -Dgradle.enterprise.allowUntrustedServer=${allowUntrustedServer} -Ddevelocity.allowUntrustedServer=${allowUntrustedServer}"
@@ -118,7 +117,7 @@ spec:
     local existingMavenOpts=$(if [ ! -z "$MAVEN_OPTS" ]; then echo "${MAVEN_OPTS} "; else echo ''; fi)
     export MAVEN_OPTS=${existingMavenOpts}${mavenOpts}
   }
-
+  
   function detectDvExtension() {
     local rootDir=$1
     if [ ! -z "${customMavenExtensionCoordinates}" ]
@@ -133,7 +132,7 @@ spec:
       echo "${appliedDefaultExtension}"
     fi
   }
-
+  
   function ccudCoordinates() {
     local coordinates='com.gradle:common-custom-user-data-maven-extension'
     if [ ! -z "${customCcudCoordinates}" ]
@@ -142,7 +141,7 @@ spec:
     fi
     echo "${coordinates}"
   }
-
+  
   function detectExtension() {
     local rootDir=$1
     local extCoordinates=$2
@@ -175,22 +174,22 @@ spec:
     done < "${extFile}"
     echo "false"
   }
-
+  
   function readXml() {
     local IFS=\>
     read -d \< elementName value
   }
-
+  
   function createShortLivedToken() {
     local allKeys="${GRADLE_ENTERPRISE_ACCESS_KEY:-${DEVELOCITY_ACCESS_KEY}}"
     if [ -z "${allKeys}" ]
     then
       return 0
     fi
-
+  
     local serverUrl=${1}
     local expiry="${2}"
-
+  
     local newAccessKey=""
     if [[ "${enforceUrl}" == "true" || $(singleKey "${allKeys}") == "true" ]]
     then
@@ -225,11 +224,11 @@ spec:
         fi
       done
     fi
-
+  
     export DEVELOCITY_ACCESS_KEY="${newAccessKey}"
     export GRADLE_ENTERPRISE_ACCESS_KEY="${DEVELOCITY_ACCESS_KEY}"
   }
-
+  
   function singleKey() {
     local allKeys=$1
     local separator=";"
@@ -241,12 +240,12 @@ spec:
       echo "false"
     fi
   }
-
+  
   function extractHostname() {
     local url=$1
     echo "${url}" | cut -d'/' -f3 | cut -d':' -f1
   }
-
+  
   function extractAccessKey() {
     local allKeys=$1
     local hostname=$2
@@ -259,7 +258,7 @@ spec:
         echo "$key"
       fi
   }
-
+  
   function getShortLivedToken() {
     local tokenUrl=$1
     local expiry=$2
@@ -267,7 +266,7 @@ spec:
     local maxRetries=3
     local retryInterval=1
     local attempt=0
-
+  
     if [ ! -z "${expiry}" ]
     then
       tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
@@ -275,23 +274,23 @@ spec:
     while [ ${attempt} -le ${maxRetries} ]
     do
       local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
-      local status_code=$(tail -n1 <<< "${response}")
+      local statusCode=$(tail -n1 <<< "${response}")
       local shortLivedToken=$(head -n -1 <<< "${response}")
-      if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
+      if [[ "${statusCode}" == "200" && ! -z "${shortLivedToken}" ]]
       then
         echo "${shortLivedToken}"
         return
-      elif [ "${status_code}" == "401" ]
+      elif [[ "${statusCode}" == "401" || "${statusCode}" == "400" ]]
       then
-        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code 401"
+        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code=${statusCode}"
         return
       else
         ((attempt++))
+        >&2 echo "Develocity short lived token request failed ${serverUrl} with status code=${statusCode} and response=${response}"
         sleep ${retryInterval}
       fi
     done
   }
-  #functions-end
 
   createTmp
   downloadDvCcudExt
