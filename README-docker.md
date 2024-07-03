@@ -17,7 +17,7 @@ For example:
 
 ## Using the images
 Assuming you have pushed the built image in a Docker registry, you can specify which image to use to run your jobs, either:
-- In the [gitlabci.yaml template](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-gitlab-ciyml) for specific jobs
+- In the [gitlab-ci.yaml template](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-gitlab-ciyml) for specific jobs
 - in the runner's [config.toml](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-configtoml) for all jobs
 
 ## Configuration
