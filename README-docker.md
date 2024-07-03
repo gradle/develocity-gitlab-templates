@@ -21,9 +21,9 @@ Assuming you have pushed the built image in a Docker registry, you can specify w
 - in the runner's [config.toml](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-configtoml) for all jobs
 
 ## Configuration
-Environment variables are available to configure the Develocity Injection when the job runs.
-Those environment variables can be set at any level. See here for more info.
+Environment variables are available to configure the Develocity injection when the job runs.
+Those environment variables can be set at any level, see [the docs](https://docs.gitlab.com/ee/ci/variables/).
 
 The 2 most important ones are `DEVELOCITY_URL` and `DEVELOCITY_ACCESS_KEY` to control where build scans are published.
 
-See the [Gradle Dockerfile](src/gradle/docker/Dockerfile) and [Maven Dockerfile](src/maven/docker/Dockerfile) to check other available environment variables.
+See the [Gradle Dockerfile](src/gradle/docker/Dockerfile) and [Maven Dockerfile](src/maven/docker/Dockerfile) for other available environment variables.
