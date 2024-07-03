@@ -8,6 +8,7 @@ These GitLab templates integrate with Develocity for Gradle and Maven builds run
 For each Gradle and Maven build that is run from GitLab, these templates exposes the links to the created Build Scan® in the CI job logs.
 The templates can also be configured to ad-hoc connect Gradle and Maven builds to an existing Develocity instance such that a Build Scan® is published each time a build is run from GitLab.
 
+As an alternative, we provide Docker image examples for Gradle and Maven build with injection already configured, see [here](README-docker.md) for more details.
 
 ## Requirements
 > [!IMPORTANT]
