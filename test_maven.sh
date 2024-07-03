@@ -545,6 +545,7 @@ function assert() {
 
 function extractCodeUnderTest() {
     source "src/maven/script/inject.sh"
+    source "src/common/token.sh"
 }
 
 function clean() {
