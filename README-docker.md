@@ -9,6 +9,12 @@ As an alternative, we provide examples of Docker images when using [Docker](http
 The images are based on "official" Gradle and Maven images from Dockerhub.
 Script options are available to tweak the images, particularly for configuring the base image version.
 
+For example:
+```
+./build_docker_gradle.sh --image myregistry/gradle-injection:1.0 --baseImageVersion 8.8.0-jdk11
+./build_docker_maven.sh --image myregistry/maven-injection:1.0 --baseImageVersion 3.9.8-amazoncorretto-11 --mavenExtensionVersion 1.21.4
+```
+
 ## Using the images
 Assuming you have pushed the built image in a Docker registry, you can specify which image to use to run your jobs, either:
 - In the [gitlabci.yaml template](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-gitlab-ciyml) for specific jobs
