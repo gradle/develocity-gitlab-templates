@@ -21,8 +21,8 @@ ENV DEVELOCITY_CAPTURE_FILE_FINGERPRINTS=true
 ENV DEVELOCITY_ENFORCE_URL=false
 
 # Internal env vars consumed by inject-wrapper.sh
-ENV DEVELOCITY_EXT_PATH=$HOME/develocity-maven-extension-$MAVEN_EXTENSION_VERSION.jar
-ENV CCUD_EXT_PATH=$HOME/common-custom-user-data-maven-extension-$CCUD_MAVEN_EXTENSION_VERSION.jar
+ENV DEVELOCITY_EXT_PATH=/develocity-maven-extension-$MAVEN_EXTENSION_VERSION.jar
+ENV CCUD_EXT_PATH=/common-custom-user-data-maven-extension-$CCUD_MAVEN_EXTENSION_VERSION.jar
 
 RUN <<EOF
 curl -v "${MAVEN_REPO}/com/gradle/common-custom-user-data-maven-extension/${CCUD_MAVEN_EXTENSION_VERSION}/common-custom-user-data-maven-extension-${CCUD_MAVEN_EXTENSION_VERSION}.jar" -o "${CCUD_EXT_PATH}"
