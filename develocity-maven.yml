@@ -6,9 +6,9 @@ spec:
     # Allow untrusted server
     allowUntrustedServer:
       default: 'false'
-    # Short-lived tokens expiry in hours (if not set, default to 2 hours, should be between 1 and 24)
+    # Short-lived tokens expiry in hours
     shortLivedTokensExpiry:
-      default: ''
+      default: '2'
     # Develocity Maven extension version
     mavenExtensionVersion:
       default: '1.21.6'
