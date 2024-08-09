@@ -5,5 +5,3 @@ url=${DEVELOCITY_URL}
 <<DEVELOCITY_INJECTION_SCRIPT_TOKEN>>
 
 createShortLivedToken "${url}" "${shortLivedTokensExpiry}"
-
-exec "$@"
