@@ -36,5 +36,3 @@ COPY src/gradle/init-scripts/develocity-injection.init.gradle $GRADLE_HOME/init.
 
 COPY src/gradle/docker/inject-wrapper.sh /inject-wrapper.sh
 RUN chmod +x /inject-wrapper.sh
-
-ENTRYPOINT ["/inject-wrapper.sh"]

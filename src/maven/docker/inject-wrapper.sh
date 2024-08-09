@@ -258,5 +258,3 @@ function getShortLivedToken() {
 createShortLivedToken "${url}" "${shortLivedTokensExpiry}"
 injectDevelocityForMaven "${PWD}"
 echo "Injecting Develocity MAVEN_OPTS=${MAVEN_OPTS}"
-
-exec "$@"

@@ -18,7 +18,13 @@ For example:
 ## Using the images
 Assuming you have pushed the built image in a Docker registry, you can specify which image to use to run your jobs, either:
 - In the [gitlab-ci.yaml template](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-gitlab-ciyml) for specific jobs
-- in the runner's [config.toml](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-configtoml) for all jobs
+- In the runner's [config.toml](https://docs.gitlab.com/runner/executors/docker.html#define-images-and-services-in-configtoml) for all jobs
+Finally, to execute the injection before every job, you need to configure the runner with a `pre_build_script` section:
+```
+  [[runners]]
+      pre_build_script = "[ -f /inject-wrapper.sh ] && source /inject-wrapper.sh"
+```
+
 
 ## Configuration
 Environment variables are available to configure the Develocity injection when the job runs.

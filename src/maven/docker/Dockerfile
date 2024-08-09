@@ -24,12 +24,8 @@ ENV DEVELOCITY_ENFORCE_URL=false
 ENV DEVELOCITY_EXT_PATH=/develocity-maven-extension-$MAVEN_EXTENSION_VERSION.jar
 ENV CCUD_EXT_PATH=/common-custom-user-data-maven-extension-$CCUD_MAVEN_EXTENSION_VERSION.jar
 
-RUN <<EOF
-curl -v "${MAVEN_REPO}/com/gradle/common-custom-user-data-maven-extension/${CCUD_MAVEN_EXTENSION_VERSION}/common-custom-user-data-maven-extension-${CCUD_MAVEN_EXTENSION_VERSION}.jar" -o "${CCUD_EXT_PATH}"
-curl -v "${MAVEN_REPO}/com/gradle/develocity-maven-extension/${MAVEN_EXTENSION_VERSION}/develocity-maven-extension-${MAVEN_EXTENSION_VERSION}.jar" -o "${DEVELOCITY_EXT_PATH}"
-EOF
+RUN curl "${MAVEN_REPO}/com/gradle/common-custom-user-data-maven-extension/${CCUD_MAVEN_EXTENSION_VERSION}/common-custom-user-data-maven-extension-${CCUD_MAVEN_EXTENSION_VERSION}.jar" -o "${CCUD_EXT_PATH}"
+RUN curl "${MAVEN_REPO}/com/gradle/develocity-maven-extension/${MAVEN_EXTENSION_VERSION}/develocity-maven-extension-${MAVEN_EXTENSION_VERSION}.jar" -o "${DEVELOCITY_EXT_PATH}"
 
 COPY src/maven/docker/inject-wrapper.sh /inject-wrapper.sh
 RUN chmod +x /inject-wrapper.sh
-
-ENTRYPOINT ["/inject-wrapper.sh"]

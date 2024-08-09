@@ -115,5 +115,3 @@ function getShortLivedToken() {
 }
 
 createShortLivedToken "${url}" "${shortLivedTokensExpiry}"
-
-exec "$@"
