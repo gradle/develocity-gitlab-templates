@@ -11,7 +11,7 @@ spec:
       default: '2'
     # Develocity Maven extension version
     mavenExtensionVersion:
-      default: '1.21.6'
+      default: '1.22'
     # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
     ccudMavenExtensionVersion:
       default: '2.0'
