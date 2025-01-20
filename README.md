@@ -87,6 +87,29 @@ test-gradle-job:
         - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH
 ```
 
+Optionally, if you'd like to apply the script to all builds, you may add it to the [`init.d` directory](https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home). With this approach, passing the script as `-I` to each build is no longer necessary.
+
+```yml
+.gradle-inject-job:
+    before_script:
+        - !reference [ .injectDevelocityForGradle ]
+        - mv "$DEVELOCITY_INIT_SCRIPT_PATH" "${GRADLE_USER_HOME:-~/.gradle}"
+    artifacts:
+        !reference [ .build_scan_links_report, artifacts ]
+
+build-gradle-job:
+    stage: build
+    extends: .gradle-inject-job
+    script:
+        - ./gradlew build
+
+test-gradle-job:
+    stage: build
+    extends: .gradle-inject-job
+    script:
+        - ./gradlew test
+```
+
 ### Maven Auto-instrumentation
 Include the remote template and optionally pass inputs.
 To enable Build Scan publishing for Maven builds, the configuration would look something like presented below (using https://develocity.mycompany.com as an example of Develocity server URL.
