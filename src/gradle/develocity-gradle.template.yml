@@ -14,7 +14,7 @@ spec:
       default: '3.19'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
     ccudPluginVersion:
-      default: '2.0.2'
+      default: '2.1'
     # Develocity Gradle plugin repository URL, defaults in the init script to https://plugins.gradle.org/m2
     gradlePluginRepositoryUrl:
       default: ''
