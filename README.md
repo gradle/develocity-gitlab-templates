@@ -93,7 +93,8 @@ Optionally, if you'd like to apply the script to all builds, you may add it to t
 .gradle-inject-job:
     before_script:
         - !reference [ .injectDevelocityForGradle ]
-        - mv "$DEVELOCITY_INIT_SCRIPT_PATH" "${GRADLE_USER_HOME:-~/.gradle}"
+        - gradle_init_d="${GRADLE_USER_HOME:-~/.gradle}/init.d"
+        - mkdir -p "$gradle_init_d" && cp "$DEVELOCITY_INIT_SCRIPT_PATH" "$gradle_init_d"
     artifacts:
         !reference [ .build_scan_links_report, artifacts ]
 
