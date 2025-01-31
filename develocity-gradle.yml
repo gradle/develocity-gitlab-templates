@@ -44,7 +44,7 @@ spec:
     cat > $initScript <<'EOF'
       /*
        * Initscript for injection of Develocity into Gradle builds.
-       * Version: v1.1
+       * Version: v1.1.1
        */
       
       import org.gradle.util.GradleVersion
@@ -89,12 +89,12 @@ spec:
       
               repositories {
                   maven {
-                      url pluginRepositoryUrl
+                      url = pluginRepositoryUrl
                       if (pluginRepositoryUsername && pluginRepositoryPassword) {
                           logger.lifecycle("Using credentials for plugin repository")
                           credentials {
-                              username(pluginRepositoryUsername)
-                              password(pluginRepositoryPassword)
+                              username = pluginRepositoryUsername
+                              password = pluginRepositoryPassword
                           }
                           authentication {
                               basic(BasicAuthentication)
