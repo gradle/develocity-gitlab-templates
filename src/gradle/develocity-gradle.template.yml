@@ -162,17 +162,18 @@ spec:
 
   function injectDevelocityForGradle() {
     export "DEVELOCITY_INJECTION_ENABLED=true"
+    export "DEVELOCITY_INJECTION_DEBUG=true"
     export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
-    export "DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE=GitLab"
-    export "DEVELOCITY_URL=$[[ inputs.url ]]"
-    export "DEVELOCITY_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
-    export "DEVELOCITY_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
-    export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
-    export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
-    export "DEVELOCITY_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureFileFingerprints ]]"
-    export "GRADLE_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
-    export "GRADLE_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
-    export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
+    export "DEVELOCITY_INJECTION_CUSTOM_VALUE=GitLab"
+    export "DEVELOCITY_INJECTION_URL=$[[ inputs.url ]]"
+    export "DEVELOCITY_INJECTION_DEVELOCITY_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
+    export "DEVELOCITY_INJECTION_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
+    export "DEVELOCITY_INJECTION_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
+    export "DEVELOCITY_INJECTION_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
+    export "DEVELOCITY_INJECTION_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureFileFingerprints ]]"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
   }
 
   createGradleInit
