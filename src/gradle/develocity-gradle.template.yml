@@ -58,6 +58,7 @@ spec:
 
     local serverUrl=${1}
     local expiry="${2}"
+    local allowUntrusted="${3}"
 
     local newAccessKey=""
     if [[ "${enforceUrl}" == "true" || $(singleKey "${allKeys}") == "true" ]]
@@ -67,7 +68,7 @@ spec:
       local tokenUrl="${serverUrl}/api/auth/token"
       if [ ! -z "${accessKey}" ]
       then
-        local token=$(getShortLivedToken $tokenUrl $expiry $accessKey)
+        local token=$(getShortLivedToken $tokenUrl $expiry $accessKey $allowUntrusted)
         if [ ! -z "${token}" ]
         then
           newAccessKey="${hostname}=${token}"
@@ -81,7 +82,7 @@ spec:
       for pair in "${pairs[@]}"; do
         IFS='=' read -r host key <<< "$pair"
         local tokenUrl="https://${host}/api/auth/token"
-        local token=$(getShortLivedToken $tokenUrl $expiry $key)
+        local token=$(getShortLivedToken $tokenUrl $expiry $key $allowUntrusted)
         if [ ! -z "${token}" ]
         then
           if [ -z "${newAccessKey}" ]
@@ -140,9 +141,15 @@ spec:
     then
       tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
     fi
+    
+    local curlOpts="-s -w \n%{http_code} -X POST"
+    if [ "${allowUntrusted}" == "true" ]; then
+      curlOpts="${curlOpts} -k"
+    fi
+
     while [ ${attempt} -le ${maxRetries} ]
     do
-      local response=$(curl -s -w "\n%{http_code}" -X POST "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
+      local response=$(curl ${curlOpts} "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
       local status_code=$(tail -n1 <<< "${response}")
       local shortLivedToken=$(head -n -1 <<< "${response}")
       if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
@@ -176,5 +183,5 @@ spec:
   }
 
   createGradleInit
-  createShortLivedToken "$[[ inputs.url ]]" "$[[ inputs.shortLivedTokensExpiry ]]"
+  createShortLivedToken "$[[ inputs.url ]]" "$[[ inputs.shortLivedTokensExpiry ]]" "$[[ inputs.allowUntrustedServer ]]"
   injectDevelocityForGradle
