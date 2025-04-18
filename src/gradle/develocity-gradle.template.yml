@@ -133,6 +133,7 @@ spec:
     local tokenUrl=$1
     local expiry=$2
     local accessKey=$3
+    local allowUntrusted=$4
     local maxRetries=3
     local retryInterval=1
     local attempt=0
