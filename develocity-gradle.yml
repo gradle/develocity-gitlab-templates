@@ -659,7 +659,7 @@ spec:
     if [ "${allowUntrusted}" == "true" ]; then
       curlOpts="${curlOpts} -k"
     fi
-  
+
     while [ ${attempt} -le ${maxRetries} ]
     do
       local response=$(curl ${curlOpts} "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
