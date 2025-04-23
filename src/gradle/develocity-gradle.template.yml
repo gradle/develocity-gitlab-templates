@@ -146,7 +146,7 @@ spec:
     local curlOpts="-s -w \n%{http_code} -X POST"
     if [ "${allowUntrusted}" == "true" ];
     then
-      curlOpts="${curlOpts} -k"
+      curlOpts="-k ${curlOpts}"
     fi
 
     while [ ${attempt} -le ${maxRetries} ]

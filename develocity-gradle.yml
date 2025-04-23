@@ -654,15 +654,16 @@ spec:
     then
       tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
     fi
-    
+
     local curlOpts="-s -w \n%{http_code} -X POST"
-    if [ "${allowUntrusted}" == "true" ]; then
-      curlOpts="${curlOpts} -k"
+    if [ "${allowUntrusted}" == "true" ];
+    then
+      curlOpts="-k ${curlOpts}"
     fi
 
     while [ ${attempt} -le ${maxRetries} ]
     do
-      local response=$(curl ${curlOpts} "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
+      local response=$(curl "${curlOpts}" "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
       local status_code=$(tail -n1 <<< "${response}")
       local shortLivedToken=$(head -n -1 <<< "${response}")
       if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
