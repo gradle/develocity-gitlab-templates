@@ -46,47 +46,47 @@ spec:
        * Initscript for injection of Develocity into Gradle builds.
        * Version: 1.2
        */
-      
+
       import org.gradle.util.GradleVersion
-      
+
       initscript {
           // NOTE: there is no mechanism to share code between the initscript{} block and the main script, so some logic is duplicated
           def isTopLevelBuild = !gradle.parent
           if (!isTopLevelBuild) {
               return
           }
-      
+
           def getInputParam = { Gradle gradle, String name ->
               def ENV_VAR_PREFIX = ''
               def envVarName = ENV_VAR_PREFIX + name.toUpperCase().replace('.', '_').replace('-', '_')
               return gradle.startParameter.systemPropertiesArgs[name] ?: System.getProperty(name) ?: System.getenv(envVarName)
           }
-      
+
           def requestedInitScriptName = getInputParam(gradle, 'develocity.injection.init-script-name')
           def initScriptName = buildscript.sourceFile.name
           if (requestedInitScriptName != initScriptName) {
               return
           }
-      
+
           // Plugin loading is only required for Develocity injection. Abort early if not enabled.
           def develocityInjectionEnabled = Boolean.parseBoolean(getInputParam(gradle, "develocity.injection-enabled"))
           if (!develocityInjectionEnabled) {
               return
           }
-      
+
           def pluginRepositoryUrl = getInputParam(gradle, 'gradle.plugin-repository.url')
           def pluginRepositoryUsername = getInputParam(gradle, 'gradle.plugin-repository.username')
           def pluginRepositoryPassword = getInputParam(gradle, 'gradle.plugin-repository.password')
           def develocityPluginVersion = getInputParam(gradle, 'develocity.plugin.version')
           def ccudPluginVersion = getInputParam(gradle, 'develocity.ccud-plugin.version')
-      
+
           def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
           def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
-      
+
           if (develocityPluginVersion || ccudPluginVersion && atLeastGradle4) {
               pluginRepositoryUrl = pluginRepositoryUrl ?: 'https://plugins.gradle.org/m2'
               logger.lifecycle("Develocity plugins resolution: $pluginRepositoryUrl")
-      
+
               repositories {
                   maven {
                       url = pluginRepositoryUrl
@@ -103,7 +103,7 @@ spec:
                   }
               }
           }
-      
+
           dependencies {
               if (develocityPluginVersion) {
                   if (atLeastGradle5) {
@@ -116,56 +116,56 @@ spec:
                       classpath "com.gradle:build-scan-plugin:1.16"
                   }
               }
-      
+
               if (ccudPluginVersion && atLeastGradle4) {
                   classpath "com.gradle:common-custom-user-data-gradle-plugin:$ccudPluginVersion"
               }
           }
       }
-      
+
       static getInputParam(Gradle gradle, String name) {
           def ENV_VAR_PREFIX = ''
           def envVarName = ENV_VAR_PREFIX + name.toUpperCase().replace('.', '_').replace('-', '_')
           return gradle.startParameter.systemPropertiesArgs[name] ?: System.getProperty(name) ?: System.getenv(envVarName)
       }
-      
+
       def isTopLevelBuild = !gradle.parent
       if (!isTopLevelBuild) {
           return
       }
-      
+
       def requestedInitScriptName = getInputParam(gradle, 'develocity.injection.init-script-name')
       def initScriptName = buildscript.sourceFile.name
       if (requestedInitScriptName != initScriptName) {
           logger.quiet("Ignoring init script '${initScriptName}' as requested name '${requestedInitScriptName}' does not match")
           return
       }
-      
+
       def develocityInjectionEnabled = Boolean.parseBoolean(getInputParam(gradle, "develocity.injection-enabled"))
       if (develocityInjectionEnabled) {
           enableDevelocityInjection()
       }
-      
+
       // To enable build-scan capture, a `captureBuildScanLink(String)` method must be added to `BuildScanCollector`.
       def buildScanCollector = new BuildScanCollector()
       def buildScanCaptureEnabled = buildScanCollector.metaClass.respondsTo(buildScanCollector, 'captureBuildScanLink', String)
       if (buildScanCaptureEnabled) {
           enableBuildScanLinkCapture(buildScanCollector)
       }
-      
+
       void enableDevelocityInjection() {
           def BUILD_SCAN_PLUGIN_CLASS = 'com.gradle.scan.plugin.BuildScanPlugin'
-      
+
           def GRADLE_ENTERPRISE_PLUGIN_ID = 'com.gradle.enterprise'
           def GRADLE_ENTERPRISE_PLUGIN_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterprisePlugin'
-      
+
           def DEVELOCITY_PLUGIN_ID = 'com.gradle.develocity'
           def DEVELOCITY_PLUGIN_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityPlugin'
-      
+
           def CI_AUTO_INJECTION_CUSTOM_VALUE_NAME = 'CI auto injection'
           def CCUD_PLUGIN_ID = 'com.gradle.common-custom-user-data-gradle-plugin'
           def CCUD_PLUGIN_CLASS = 'com.gradle.CommonCustomUserDataGradlePlugin'
-      
+
           def develocityUrl = getInputParam(gradle, 'develocity.url')
           def develocityAllowUntrustedServer = Boolean.parseBoolean(getInputParam(gradle, 'develocity.allow-untrusted-server'))
           def develocityEnforceUrl = Boolean.parseBoolean(getInputParam(gradle, 'develocity.enforce-url'))
@@ -176,44 +176,44 @@ spec:
           def buildScanTermsOfUseUrl = getInputParam(gradle, 'develocity.terms-of-use.url')
           def buildScanTermsOfUseAgree = getInputParam(gradle, 'develocity.terms-of-use.agree')
           def ciAutoInjectionCustomValueValue = getInputParam(gradle, 'develocity.auto-injection.custom-value')
-      
+
           def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
           def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
           def shouldApplyDevelocityPlugin = atLeastGradle5 && develocityPluginVersion && isAtLeast(develocityPluginVersion, '3.17')
-      
+
           def dvOrGe = { def dvValue, def geValue ->
               if (shouldApplyDevelocityPlugin) {
                   return dvValue instanceof Closure<?> ? dvValue() : dvValue
               }
               return geValue instanceof Closure<?> ? geValue() : geValue
           }
-      
+
           def printEnforcingDevelocityUrl = {
               logger.lifecycle("Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer")
           }
-      
+
           def printAcceptingGradleTermsOfUse = {
               logger.lifecycle("Accepting Gradle Terms of Use: $buildScanTermsOfUseUrl")
           }
-      
+
           // finish early if DV plugin version is unsupported (v3.6.4 is the minimum version tested and supports back to DV 2021.1)
           if (develocityPluginVersion && isNotAtLeast(develocityPluginVersion, '3.6.4')) {
               logger.warn("Develocity Gradle plugin must be at least 3.6.4. Configured version is $develocityPluginVersion.")
               return
           }
-      
+
           // finish early if configuration parameters passed in via system properties are not valid/supported
           if (ccudPluginVersion && isNotAtLeast(ccudPluginVersion, '1.7')) {
               logger.warn("Common Custom User Data Gradle plugin must be at least 1.7. Configured version is $ccudPluginVersion.")
               return
           }
-      
+
           // Conditionally apply and configure the Develocity plugin
           if (GradleVersion.current() < GradleVersion.version('6.0')) {
               rootProject {
                   buildscript.configurations.getByName("classpath").incoming.afterResolve { ResolvableDependencies incoming ->
                       def resolutionResult = incoming.resolutionResult
-      
+
                       if (develocityPluginVersion) {
                           def scanPluginComponent = resolutionResult.allComponents.find {
                               it.moduleVersion.with { group == "com.gradle" && ['build-scan-plugin', 'gradle-enterprise-gradle-plugin', 'develocity-gradle-plugin'].contains(name) }
@@ -252,7 +252,7 @@ spec:
                               }
                           }
                       }
-      
+
                       eachDevelocityProjectExtension(project,
                           { develocity ->
                               afterEvaluate {
@@ -262,13 +262,13 @@ spec:
                                       develocity.allowUntrustedServer = develocityAllowUntrustedServer
                                   }
                               }
-      
+
                               if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                                   printAcceptingGradleTermsOfUse()
                                   develocity.buildScan.termsOfUseUrl = buildScanTermsOfUseUrl
                                   develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
                               }
-      
+
                               logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
                               develocity.buildScan.uploadInBackground = buildScanUploadInBackground
                           },
@@ -280,7 +280,7 @@ spec:
                                       buildScan.allowUntrustedServer = develocityAllowUntrustedServer
                                   }
                               }
-      
+
                               if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                                   printAcceptingGradleTermsOfUse()
                                   if (buildScan.metaClass.respondsTo(buildScan, 'setTermsOfServiceUrl', String)) {
@@ -291,7 +291,7 @@ spec:
                                       buildScan.licenseAgree = buildScanTermsOfUseAgree
                                   }
                               }
-      
+
                               // uploadInBackground available for build-scan-plugin 3.3.4 and later only
                               if (buildScan.metaClass.respondsTo(buildScan, 'setUploadInBackground', Boolean)) {
                                   logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
@@ -299,7 +299,7 @@ spec:
                               }
                           }
                       )
-      
+
                       if (ccudPluginVersion && atLeastGradle4) {
                           def ccudPluginComponent = resolutionResult.allComponents.find {
                               it.moduleVersion.with { group == "com.gradle" && name == "common-custom-user-data-gradle-plugin" }
@@ -330,11 +330,11 @@ spec:
                                   }
                               }
                           }
-      
+
                           eachDevelocitySettingsExtension(settings) { ext ->
                               ext.buildScan.value CI_AUTO_INJECTION_CUSTOM_VALUE_NAME, ciAutoInjectionCustomValueValue
                           }
-      
+
                           eachDevelocitySettingsExtension(settings,
                               { develocity ->
                                   logger.lifecycle("Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
@@ -354,7 +354,7 @@ spec:
                           )
                       }
                   }
-      
+
                   eachDevelocitySettingsExtension(settings,
                       { develocity ->
                           if (develocityUrl && develocityEnforceUrl) {
@@ -362,13 +362,13 @@ spec:
                               develocity.server = develocityUrl
                               develocity.allowUntrustedServer = develocityAllowUntrustedServer
                           }
-      
+
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               printAcceptingGradleTermsOfUse()
                               develocity.buildScan.termsOfUseUrl = buildScanTermsOfUseUrl
                               develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
                           }
-      
+
                           logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
                           develocity.buildScan.uploadInBackground = buildScanUploadInBackground
                       },
@@ -384,13 +384,13 @@ spec:
                                   gradleEnterprise.buildScan.allowUntrustedServer = develocityAllowUntrustedServer
                               }
                           }
-      
+
                           if (buildScanTermsOfUseUrl && buildScanTermsOfUseAgree) {
                               printAcceptingGradleTermsOfUse()
                               gradleEnterprise.buildScan.termsOfServiceUrl = buildScanTermsOfUseUrl
                               gradleEnterprise.buildScan.termsOfServiceAgree = buildScanTermsOfUseAgree
                           }
-      
+
                           // uploadInBackground available for gradle-enterprise-plugin 3.3.4 and later only
                           if (gradleEnterprise.buildScan.metaClass.respondsTo(gradleEnterprise.buildScan, 'setUploadInBackground', Boolean)) {
                               logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
@@ -398,7 +398,7 @@ spec:
                           }
                       }
                   )
-      
+
                   if (ccudPluginVersion) {
                       if (!settings.pluginManager.hasPlugin(CCUD_PLUGIN_ID)) {
                           logger.lifecycle("Applying $CCUD_PLUGIN_CLASS with version $ccudPluginVersion via init script")
@@ -408,10 +408,10 @@ spec:
               }
           }
       }
-      
+
       void applyPluginExternally(def pluginManager, String pluginClassName, String pluginVersion) {
           logger.lifecycle("Applying $pluginClassName with version $pluginVersion via init script")
-      
+
           def externallyApplied = 'develocity.externally-applied'
           def externallyAppliedDeprecated = 'gradle.enterprise.externally-applied'
           def oldValue = System.getProperty(externallyApplied)
@@ -433,7 +433,7 @@ spec:
               }
           }
       }
-      
+
       /**
        * Apply the `dvAction` to all 'develocity' extensions.
        * If no 'develocity' extensions are found, apply the `geAction` to all 'gradleEnterprise' extensions.
@@ -442,7 +442,7 @@ spec:
       static def eachDevelocitySettingsExtension(def settings, def dvAction, def geAction = dvAction) {
           def GRADLE_ENTERPRISE_EXTENSION_CLASS = 'com.gradle.enterprise.gradleplugin.GradleEnterpriseExtension'
           def DEVELOCITY_CONFIGURATION_CLASS = 'com.gradle.develocity.agent.gradle.DevelocityConfiguration'
-      
+
           def dvExtensions = settings.extensions.extensionsSchema.elements
               .findAll { it.publicType.concreteClass.name == DEVELOCITY_CONFIGURATION_CLASS }
               .collect { settings[it.name] }
@@ -455,7 +455,7 @@ spec:
               geExtensions.each(geAction)
           }
       }
-      
+
       /**
        * Apply the `dvAction` to the 'develocity' extension.
        * If no 'develocity' extension is found, apply the `bsAction` to the 'buildScan' extension.
@@ -464,7 +464,7 @@ spec:
       static def eachDevelocityProjectExtension(def project, def dvAction, def bsAction = dvAction) {
           def BUILD_SCAN_PLUGIN_ID = 'com.gradle.build-scan'
           def DEVELOCITY_PLUGIN_ID = 'com.gradle.develocity'
-      
+
           def configureDvOrBsExtension = {
               if (project.extensions.findByName("develocity")) {
                   dvAction(project.develocity)
@@ -472,24 +472,24 @@ spec:
                   bsAction(project.buildScan)
               }
           }
-      
+
           project.pluginManager.withPlugin(BUILD_SCAN_PLUGIN_ID, configureDvOrBsExtension)
-      
+
           project.pluginManager.withPlugin(DEVELOCITY_PLUGIN_ID) {
               // Proper extension will be configured by the build-scan callback.
               if (project.pluginManager.hasPlugin(BUILD_SCAN_PLUGIN_ID)) return
               configureDvOrBsExtension()
           }
       }
-      
+
       static boolean isAtLeast(String versionUnderTest, String referenceVersion) {
           GradleVersion.version(versionUnderTest) >= GradleVersion.version(referenceVersion)
       }
-      
+
       static boolean isNotAtLeast(String versionUnderTest, String referenceVersion) {
           !isAtLeast(versionUnderTest, referenceVersion)
       }
-      
+
       void enableBuildScanLinkCapture(BuildScanCollector collector) {
           // Conditionally apply and configure the Develocity plugin
           if (GradleVersion.current() < GradleVersion.version('6.0')) {
@@ -507,7 +507,7 @@ spec:
               }
           }
       }
-      
+
       // Action will only be called if a `BuildScanCollector.captureBuildScanLink` method is present.
       // Add `void captureBuildScanLink(String) {}` to the `BuildScanCollector` class to respond to buildScanPublished events
       static buildScanPublishedAction(def buildScanExtension, BuildScanCollector collector) {
@@ -517,7 +517,7 @@ spec:
               }
           }
       }
-      
+
       // Custom implementation of BuildScanCollector for GitLab integration
       class BuildScanCollector {
         def captureBuildScanLink(String buildScanLink) {
@@ -539,18 +539,18 @@ spec:
           }
         }
       }
-      
+
       class Report {
         List<Link> build_scans = []
-      
+
         void addLink(String url) {
           build_scans << new Link(url)
         }
       }
-      
+
       class Link {
         Map external_link
-      
+
         Link(String url) {
           external_link = [ 'label': url, 'url': url ]
         }
@@ -655,15 +655,15 @@ spec:
       tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
     fi
 
-    local curlOpts="-s -w \n%{http_code} -X POST"
+    local curlOpts=(-s -w \n%{http_code} -X POST)
     if [ "${allowUntrusted}" == "true" ];
     then
-      curlOpts="-k ${curlOpts}"
+      curlOpts+=(-k)
     fi
 
     while [ ${attempt} -le ${maxRetries} ]
     do
-      local response=$(curl "${curlOpts}" "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
+      local response=$(curl "${curlOpts[@}" "${tokenUrl}" -H "Authorization: Bearer ${accessKey}")
       local status_code=$(tail -n1 <<< "${response}")
       local shortLivedToken=$(head -n -1 <<< "${response}")
       if [[ "${status_code}" == "200" && ! -z "${shortLivedToken}" ]]
