@@ -655,7 +655,7 @@ spec:
       tokenUrl="${tokenUrl}?expiresInHours=${expiry}"
     fi
 
-    local curlOpts=(-s -w \n%{http_code} -X POST)
+    local curlOpts=(-s -w "\n%{http_code}" -X POST)
     if [ "${allowUntrusted}" == "true" ];
     then
     curlOpts+=(-k)
