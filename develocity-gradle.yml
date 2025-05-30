@@ -44,7 +44,7 @@ spec:
     cat > $initScript <<'EOF'
       /*
        * Initscript for injection of Develocity into Gradle builds.
-       * Version: 1.2
+       * Version: 2.0
        */
       
       import org.gradle.util.GradleVersion
@@ -62,36 +62,37 @@ spec:
               return gradle.startParameter.systemPropertiesArgs[name] ?: System.getProperty(name) ?: System.getenv(envVarName)
           }
       
-          def requestedInitScriptName = getInputParam(gradle, 'develocity.injection.init-script-name')
+          def requestedInitScriptName = getInputParam(gradle, 'develocity-injection.init-script-name')
           def initScriptName = buildscript.sourceFile.name
           if (requestedInitScriptName != initScriptName) {
               return
           }
       
           // Plugin loading is only required for Develocity injection. Abort early if not enabled.
-          def develocityInjectionEnabled = Boolean.parseBoolean(getInputParam(gradle, "develocity.injection-enabled"))
+          def develocityInjectionEnabled = Boolean.parseBoolean(getInputParam(gradle, "develocity-injection.enabled"))
           if (!develocityInjectionEnabled) {
               return
           }
       
-          def pluginRepositoryUrl = getInputParam(gradle, 'gradle.plugin-repository.url')
-          def pluginRepositoryUsername = getInputParam(gradle, 'gradle.plugin-repository.username')
-          def pluginRepositoryPassword = getInputParam(gradle, 'gradle.plugin-repository.password')
-          def develocityPluginVersion = getInputParam(gradle, 'develocity.plugin.version')
-          def ccudPluginVersion = getInputParam(gradle, 'develocity.ccud-plugin.version')
+          def pluginRepositoryUrl = getInputParam(gradle, 'develocity-injection.plugin-repository.url')
+          def pluginRepositoryUsername = getInputParam(gradle, 'develocity-injection.plugin-repository.username')
+          def pluginRepositoryPassword = getInputParam(gradle, 'develocity-injection.plugin-repository.password')
+          def develocityPluginVersion = getInputParam(gradle, 'develocity-injection.develocity-plugin.version')
+          def ccudPluginVersion = getInputParam(gradle, 'develocity-injection.ccud-plugin.version')
+          def logLevel = Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.debug')) ? LogLevel.LIFECYCLE : LogLevel.INFO
       
           def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
           def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
       
           if (develocityPluginVersion || ccudPluginVersion && atLeastGradle4) {
               pluginRepositoryUrl = pluginRepositoryUrl ?: 'https://plugins.gradle.org/m2'
-              logger.lifecycle("Develocity plugins resolution: $pluginRepositoryUrl")
+              logger.log(logLevel, "Develocity plugins resolution: $pluginRepositoryUrl")
       
               repositories {
                   maven {
                       url = pluginRepositoryUrl
                       if (pluginRepositoryUsername && pluginRepositoryPassword) {
-                          logger.lifecycle("Using credentials for plugin repository")
+                          logger.log(logLevel, "Using credentials for plugin repository")
                           credentials {
                               username = pluginRepositoryUsername
                               password = pluginRepositoryPassword
@@ -134,15 +135,15 @@ spec:
           return
       }
       
-      def requestedInitScriptName = getInputParam(gradle, 'develocity.injection.init-script-name')
+      def requestedInitScriptName = getInputParam(gradle, 'develocity-injection.init-script-name')
       def initScriptName = buildscript.sourceFile.name
-      if (requestedInitScriptName != initScriptName) {
-          logger.quiet("Ignoring init script '${initScriptName}' as requested name '${requestedInitScriptName}' does not match")
-          return
-      }
       
-      def develocityInjectionEnabled = Boolean.parseBoolean(getInputParam(gradle, "develocity.injection-enabled"))
+      def develocityInjectionEnabled = Boolean.parseBoolean(getInputParam(gradle, "develocity-injection.enabled"))
       if (develocityInjectionEnabled) {
+          if (requestedInitScriptName != initScriptName) {
+              logger.log(LogLevel.WARN, "Develocity injection not enabled because requested init script name was '${requestedInitScriptName}', but '${initScriptName}' was expected")
+              return
+          }
           enableDevelocityInjection()
       }
       
@@ -150,6 +151,10 @@ spec:
       def buildScanCollector = new BuildScanCollector()
       def buildScanCaptureEnabled = buildScanCollector.metaClass.respondsTo(buildScanCollector, 'captureBuildScanLink', String)
       if (buildScanCaptureEnabled) {
+          if (requestedInitScriptName != initScriptName) {
+              logger.log(LogLevel.WARN, "Build Scan capture not enabled because requested init script name was '${requestedInitScriptName}', but '${initScriptName}' was expected")
+              return
+          }
           enableBuildScanLinkCapture(buildScanCollector)
       }
       
@@ -166,16 +171,17 @@ spec:
           def CCUD_PLUGIN_ID = 'com.gradle.common-custom-user-data-gradle-plugin'
           def CCUD_PLUGIN_CLASS = 'com.gradle.CommonCustomUserDataGradlePlugin'
       
-          def develocityUrl = getInputParam(gradle, 'develocity.url')
-          def develocityAllowUntrustedServer = Boolean.parseBoolean(getInputParam(gradle, 'develocity.allow-untrusted-server'))
-          def develocityEnforceUrl = Boolean.parseBoolean(getInputParam(gradle, 'develocity.enforce-url'))
-          def buildScanUploadInBackground = Boolean.parseBoolean(getInputParam(gradle, 'develocity.build-scan.upload-in-background'))
-          def develocityCaptureFileFingerprints = getInputParam(gradle, 'develocity.capture-file-fingerprints') ? Boolean.parseBoolean(getInputParam(gradle, 'develocity.capture-file-fingerprints')) : true
-          def develocityPluginVersion = getInputParam(gradle, 'develocity.plugin.version')
-          def ccudPluginVersion = getInputParam(gradle, 'develocity.ccud-plugin.version')
-          def buildScanTermsOfUseUrl = getInputParam(gradle, 'develocity.terms-of-use.url')
-          def buildScanTermsOfUseAgree = getInputParam(gradle, 'develocity.terms-of-use.agree')
-          def ciAutoInjectionCustomValueValue = getInputParam(gradle, 'develocity.auto-injection.custom-value')
+          def develocityUrl = getInputParam(gradle, 'develocity-injection.url')
+          def develocityAllowUntrustedServer = Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.allow-untrusted-server'))
+          def develocityEnforceUrl = Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.enforce-url'))
+          def buildScanUploadInBackground = Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.upload-in-background'))
+          def develocityCaptureFileFingerprints = getInputParam(gradle, 'develocity-injection.capture-file-fingerprints') ? Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.capture-file-fingerprints')) : true
+          def develocityPluginVersion = getInputParam(gradle, 'develocity-injection.develocity-plugin.version')
+          def ccudPluginVersion = getInputParam(gradle, 'develocity-injection.ccud-plugin.version')
+          def buildScanTermsOfUseUrl = getInputParam(gradle, 'develocity-injection.terms-of-use.url')
+          def buildScanTermsOfUseAgree = getInputParam(gradle, 'develocity-injection.terms-of-use.agree')
+          def ciAutoInjectionCustomValueValue = getInputParam(gradle, 'develocity-injection.custom-value')
+          def logLevel = Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.debug')) ? LogLevel.LIFECYCLE : LogLevel.INFO
       
           def atLeastGradle5 = GradleVersion.current() >= GradleVersion.version('5.0')
           def atLeastGradle4 = GradleVersion.current() >= GradleVersion.version('4.0')
@@ -189,22 +195,22 @@ spec:
           }
       
           def printEnforcingDevelocityUrl = {
-              logger.lifecycle("Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer")
+              logger.log(logLevel, "Enforcing Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer")
           }
       
           def printAcceptingGradleTermsOfUse = {
-              logger.lifecycle("Accepting Gradle Terms of Use: $buildScanTermsOfUseUrl")
+              logger.log(logLevel, "Accepting Gradle Terms of Use: $buildScanTermsOfUseUrl")
           }
       
           // finish early if DV plugin version is unsupported (v3.6.4 is the minimum version tested and supports back to DV 2021.1)
           if (develocityPluginVersion && isNotAtLeast(develocityPluginVersion, '3.6.4')) {
-              logger.warn("Develocity Gradle plugin must be at least 3.6.4. Configured version is $develocityPluginVersion.")
+              logger.log(LogLevel.WARN, "Develocity Gradle plugin must be at least 3.6.4. Configured version is $develocityPluginVersion.")
               return
           }
       
           // finish early if configuration parameters passed in via system properties are not valid/supported
           if (ccudPluginVersion && isNotAtLeast(ccudPluginVersion, '1.7')) {
-              logger.warn("Common Custom User Data Gradle plugin must be at least 1.7. Configured version is $ccudPluginVersion.")
+              logger.log(LogLevel.WARN, "Common Custom User Data Gradle plugin must be at least 1.7. Configured version is $ccudPluginVersion.")
               return
           }
       
@@ -231,7 +237,7 @@ spec:
                                   { rootExtension }
                               )
                               if (develocityUrl) {
-                                  logger.lifecycle("Connection to Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
+                                  logger.log(logLevel, "Connection to Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
                                   rootExtension.server = develocityUrl
                                   rootExtension.allowUntrustedServer = develocityAllowUntrustedServer
                               }
@@ -241,7 +247,7 @@ spec:
                               }
                               buildScanExtension.value CI_AUTO_INJECTION_CUSTOM_VALUE_NAME, ciAutoInjectionCustomValueValue
                               if (isAtLeast(develocityPluginVersion, '2.1') && atLeastGradle5) {
-                                  logger.lifecycle("Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
+                                  logger.log(logLevel, "Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
                                   if (isAtLeast(develocityPluginVersion, '3.17')) {
                                       buildScanExtension.capture.fileFingerprints.set(develocityCaptureFileFingerprints)
                                   } else if (isAtLeast(develocityPluginVersion, '3.7')) {
@@ -269,7 +275,7 @@ spec:
                                   develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
                               }
       
-                              logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
+                              logger.log(logLevel, "Setting uploadInBackground: $buildScanUploadInBackground")
                               develocity.buildScan.uploadInBackground = buildScanUploadInBackground
                           },
                           { buildScan ->
@@ -294,7 +300,7 @@ spec:
       
                               // uploadInBackground available for build-scan-plugin 3.3.4 and later only
                               if (buildScan.metaClass.respondsTo(buildScan, 'setUploadInBackground', Boolean)) {
-                                  logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
+                                  logger.log(logLevel, "Setting uploadInBackground: $buildScanUploadInBackground")
                                   buildScan.uploadInBackground = buildScanUploadInBackground
                               }
                           }
@@ -305,7 +311,7 @@ spec:
                               it.moduleVersion.with { group == "com.gradle" && name == "common-custom-user-data-gradle-plugin" }
                           }
                           if (!ccudPluginComponent) {
-                              logger.lifecycle("Applying $CCUD_PLUGIN_CLASS with version $ccudPluginVersion via init script")
+                              logger.log(logLevel, "Applying $CCUD_PLUGIN_CLASS with version $ccudPluginVersion via init script")
                               pluginManager.apply(initscript.classLoader.loadClass(CCUD_PLUGIN_CLASS))
                           }
                       }
@@ -318,7 +324,7 @@ spec:
                           def pluginClass = dvOrGe(DEVELOCITY_PLUGIN_CLASS, GRADLE_ENTERPRISE_PLUGIN_CLASS)
                           applyPluginExternally(settings.pluginManager, pluginClass, develocityPluginVersion)
                           if (develocityUrl) {
-                              logger.lifecycle("Connection to Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
+                              logger.log(logLevel, "Connection to Develocity: $develocityUrl, allowUntrustedServer: $develocityAllowUntrustedServer, captureFileFingerprints: $develocityCaptureFileFingerprints")
                               eachDevelocitySettingsExtension(settings) { ext ->
                                   // server and allowUntrustedServer must be configured via buildScan extension for gradle-enterprise-plugin 3.1.1 and earlier
                                   if (ext.metaClass.respondsTo(ext, 'getServer')) {
@@ -337,13 +343,13 @@ spec:
       
                           eachDevelocitySettingsExtension(settings,
                               { develocity ->
-                                  logger.lifecycle("Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
+                                  logger.log(logLevel, "Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
                                   develocity.buildScan.capture.fileFingerprints = develocityCaptureFileFingerprints
                               },
                               { gradleEnterprise ->
                                   gradleEnterprise.buildScan.publishAlways()
                                   if (isAtLeast(develocityPluginVersion, '2.1')) {
-                                      logger.lifecycle("Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
+                                      logger.log(logLevel, "Setting captureFileFingerprints: $develocityCaptureFileFingerprints")
                                       if (isAtLeast(develocityPluginVersion, '3.7')) {
                                           gradleEnterprise.buildScan.capture.taskInputFiles = develocityCaptureFileFingerprints
                                       } else {
@@ -369,7 +375,7 @@ spec:
                               develocity.buildScan.termsOfUseAgree = buildScanTermsOfUseAgree
                           }
       
-                          logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
+                          logger.log(logLevel, "Setting uploadInBackground: $buildScanUploadInBackground")
                           develocity.buildScan.uploadInBackground = buildScanUploadInBackground
                       },
                       { gradleEnterprise ->
@@ -393,7 +399,7 @@ spec:
       
                           // uploadInBackground available for gradle-enterprise-plugin 3.3.4 and later only
                           if (gradleEnterprise.buildScan.metaClass.respondsTo(gradleEnterprise.buildScan, 'setUploadInBackground', Boolean)) {
-                              logger.lifecycle("Setting uploadInBackground: $buildScanUploadInBackground")
+                              logger.log(logLevel, "Setting uploadInBackground: $buildScanUploadInBackground")
                               gradleEnterprise.buildScan.uploadInBackground = buildScanUploadInBackground
                           }
                       }
@@ -401,7 +407,7 @@ spec:
       
                   if (ccudPluginVersion) {
                       if (!settings.pluginManager.hasPlugin(CCUD_PLUGIN_ID)) {
-                          logger.lifecycle("Applying $CCUD_PLUGIN_CLASS with version $ccudPluginVersion via init script")
+                          logger.log(logLevel, "Applying $CCUD_PLUGIN_CLASS with version $ccudPluginVersion via init script")
                           settings.pluginManager.apply(initscript.classLoader.loadClass(CCUD_PLUGIN_CLASS))
                       }
                   }
@@ -410,7 +416,8 @@ spec:
       }
       
       void applyPluginExternally(def pluginManager, String pluginClassName, String pluginVersion) {
-          logger.lifecycle("Applying $pluginClassName with version $pluginVersion via init script")
+          def logLevel = Boolean.parseBoolean(getInputParam(gradle, 'develocity-injection.debug')) ? LogLevel.LIFECYCLE : LogLevel.INFO
+          logger.log(logLevel, "Applying $pluginClassName with version $pluginVersion via init script")
       
           def externallyApplied = 'develocity.externally-applied'
           def externallyAppliedDeprecated = 'gradle.enterprise.externally-applied'
@@ -683,17 +690,18 @@ spec:
 
   function injectDevelocityForGradle() {
     export "DEVELOCITY_INJECTION_ENABLED=true"
+    export "DEVELOCITY_INJECTION_DEBUG=true"
     export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
-    export "DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE=GitLab"
-    export "DEVELOCITY_URL=$[[ inputs.url ]]"
-    export "DEVELOCITY_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
-    export "DEVELOCITY_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
-    export "DEVELOCITY_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
-    export "DEVELOCITY_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
-    export "DEVELOCITY_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureFileFingerprints ]]"
-    export "GRADLE_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
-    export "GRADLE_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
-    export "GRADLE_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
+    export "DEVELOCITY_INJECTION_CUSTOM_VALUE=GitLab"
+    export "DEVELOCITY_INJECTION_URL=$[[ inputs.url ]]"
+    export "DEVELOCITY_INJECTION_DEVELOCITY_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
+    export "DEVELOCITY_INJECTION_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
+    export "DEVELOCITY_INJECTION_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
+    export "DEVELOCITY_INJECTION_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
+    export "DEVELOCITY_INJECTION_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureFileFingerprints ]]"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
   }
 
   createGradleInit
