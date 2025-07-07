@@ -20,19 +20,19 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 ## Configuration
 ### Gradle Auto-instrumentation
 Include the remote template and optionally pass inputs.
-To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.mycompany.com as an example of Develocity server URL.
+To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.example.com as an example of Develocity server URL.
 
 ```yml
 include:
   - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.3/develocity-gradle.yml'
     inputs:
-      url: https://develocity.mycompany.com
+      url: https://develocity.example.com
 
 build-gradle-job:
   stage: build
   script:
     - !reference [.injectDevelocityForGradle]
-    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.mycompany.com
+    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.example.com
 ```
 The `.injectDevelocityForGradle` creates an init script with the instrumentation logic and exports the path as `$DEVELOCITY_INIT_SCRIPT_PATH` environment variable.
 For all other options see `inputs` section in [develocity-gradle.yml](develocity-gradle.yml).
@@ -48,7 +48,7 @@ Here's an example:
 include:
   - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/main/develocity-gradle.yml'
     inputs:
-      url: https://develocity.mycompany.com
+      url: https://develocity.example.com
 
 build-gradle-job:
   stage: build
@@ -89,19 +89,19 @@ test-gradle-job:
 
 ### Maven Auto-instrumentation
 Include the remote template and optionally pass inputs.
-To enable Build Scan publishing for Maven builds, the configuration would look something like presented below (using https://develocity.mycompany.com as an example of Develocity server URL.
+To enable Build Scan publishing for Maven builds, the configuration would look something like presented below (using https://develocity.example.com as an example of Develocity server URL.
 
 ```yml
 include:
   - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.3/develocity-maven.yml'
     inputs:
-      url: https://develocity.mycompany.com
+      url: https://develocity.example.com
 
 build-maven-job:
   stage: build
   script:
     - !reference [.injectDevelocityForMaven]
-    - ./mvnw clean verify # Will publish a build scan to https://develocity.mycompany.com
+    - ./mvnw clean verify # Will publish a build scan to https://develocity.example.com
 ```
 
 The `.injectDevelocityForMaven` downloads the extensions and references them in `MAVEN_OPTS`.
@@ -118,22 +118,22 @@ If you have both Gradle and Maven builds in a pipeline, you can simply just incl
 include:
   - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.3/develocity-gradle.yml"
     inputs:
-      url: https://develocity.mycompany.com
+      url: https://develocity.example.com
   - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.3/develocity-maven.yml"
     inputs:
-      url: https://develocity.mycompany.com
+      url: https://develocity.example.com
 
 build-maven-job:
   stage: build
   script:
     - !reference [.injectDevelocityForMaven]
-    - ./mvnw clean verify # Will publish a build scan to https://develocity.mycompany.com
+    - ./mvnw clean verify # Will publish a build scan to https://develocity.example.com
 
 build-gradle-job:
   stage: build
   script:
     - !reference [.injectDevelocityForGradle]
-    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.mycompany.com
+    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.example.com
 ```
 
 ### Auto-instrumentation compatibility
