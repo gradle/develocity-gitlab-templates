@@ -14,7 +14,7 @@ spec:
       default: '2.1'
     # Common Custom User Data Maven extension version (see https://github.com/gradle/common-custom-user-data-maven-extension)
     ccudMavenExtensionVersion:
-      default: '2.0.4'
+      default: '2.0.5'
     # Maven remote repository to download extension jars from
     mavenRepo:
       default: 'https://repo1.maven.org/maven2'
