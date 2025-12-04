@@ -109,7 +109,7 @@ spec:
       mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
     elif [[ "${appliedCustomDv}" = "false" && "${appliedCustomCcud}" = "false" ]]
     then
-      mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url}"
+      mavenOpts="${mavenOpts} -Dgradle.enterprise.url=${url} -Ddevelocity.url=${url} -Dscan.value.CIAutoInjection=GitLab"
     fi
     if [[ "${appliedCustomDv}" = "false" && ("${captureFileFingerprints}" = "true" || "${captureFileFingerprints}" = "false") ]]
     then
