@@ -49,6 +49,17 @@ spec:
     export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
   }
 
+  allowUntrustedServer=$[[ inputs.allowUntrustedServer ]]
+  shortLivedTokensExpiry=$[[ inputs.shortLivedTokensExpiry ]]
+  enforceUrl=$[[ inputs.enforceUrl ]]
+  captureFileFingerprints=$[[ inputs.captureFileFingerprints ]]
+  gradlePluginVersion=$[[ inputs.gradlePluginVersion ]]
+  ccudPluginVersion=$[[ inputs.ccudPluginVersion ]]
+  gradlePluginRepositoryUrl=$[[ inputs.gradlePluginRepositoryUrl ]]
+  gradlePluginRepositoryUsername=$[[ inputs.gradlePluginRepositoryUsername ]]
+  gradlePluginRepositoryPassword=$[[ inputs.gradlePluginRepositoryPassword ]]
+  url=$[[ inputs.url ]]
+
   function createShortLivedToken() {
     local allKeys="${GRADLE_ENTERPRISE_ACCESS_KEY:-${DEVELOCITY_ACCESS_KEY}}"
     if [ -z "${allKeys}" ]
@@ -168,23 +179,23 @@ spec:
       fi
     done
   }
-
+  #functions-start
   function injectDevelocityForGradle() {
     export "DEVELOCITY_INJECTION_ENABLED=true"
     export "DEVELOCITY_INJECTION_DEBUG=true"
     export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
     export "DEVELOCITY_INJECTION_CUSTOM_VALUE=GitLab"
-    export "DEVELOCITY_INJECTION_URL=$[[ inputs.url ]]"
-    export "DEVELOCITY_INJECTION_DEVELOCITY_PLUGIN_VERSION=$[[ inputs.gradlePluginVersion ]]"
-    export "DEVELOCITY_INJECTION_CCUD_PLUGIN_VERSION=$[[ inputs.ccudPluginVersion ]]"
-    export "DEVELOCITY_INJECTION_ALLOW_UNTRUSTED_SERVER=$[[ inputs.allowUntrustedServer ]]"
-    export "DEVELOCITY_INJECTION_ENFORCE_URL=$[[ inputs.enforceUrl ]]"
-    export "DEVELOCITY_INJECTION_CAPTURE_FILE_FINGERPRINTS=$[[ inputs.captureFileFingerprints ]]"
-    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_URL=$[[ inputs.gradlePluginRepositoryUrl ]]"
-    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_USERNAME=$[[ inputs.gradlePluginRepositoryUsername ]]"
-    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_PASSWORD=$[[ inputs.gradlePluginRepositoryPassword ]]"
+    export "DEVELOCITY_INJECTION_URL=${url}"
+    export "DEVELOCITY_INJECTION_DEVELOCITY_PLUGIN_VERSION=${gradlePluginVersion}"
+    export "DEVELOCITY_INJECTION_CCUD_PLUGIN_VERSION=${ccudPluginVersion}"
+    export "DEVELOCITY_INJECTION_ALLOW_UNTRUSTED_SERVER=${allowUntrustedServer}"
+    export "DEVELOCITY_INJECTION_ENFORCE_URL=${enforceUrl}"
+    export "DEVELOCITY_INJECTION_CAPTURE_FILE_FINGERPRINTS=${captureFileFingerprints}"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_URL=${gradlePluginRepositoryUrl}"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_USERNAME=${gradlePluginRepositoryUsername}"
+    export "DEVELOCITY_INJECTION_PLUGIN_REPOSITORY_PASSWORD=${gradlePluginRepositoryPassword}"
   }
-
+  #functions-end
   createGradleInit
-  createShortLivedToken "$[[ inputs.url ]]" "$[[ inputs.shortLivedTokensExpiry ]]" "$[[ inputs.allowUntrustedServer ]]"
+  createShortLivedToken "${url}" "${shortLivedTokensExpiry}" "${allowUntrustedServer}"
   injectDevelocityForGradle
