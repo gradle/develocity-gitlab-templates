@@ -69,22 +69,46 @@ Using GitLab templating, that can be factored and applied to multiple jobs:
 
 ```yml
 .gradle-inject-job:
-    before_script:
-        - !reference [ .injectDevelocityForGradle ]
-    artifacts:
-        !reference [ .build_scan_links_report, artifacts ]
+  before_script:
+    - !reference [ .injectDevelocityForGradle ]
+  artifacts:
+    !reference [ .build_scan_links_report, artifacts ]
 
 build-gradle-job:
-    stage: build
-    extends: .gradle-inject-job
-    script:
-        - ./gradlew build -I $DEVELOCITY_INIT_SCRIPT_PATH
+  stage: build
+  extends: .gradle-inject-job
+  script:
+    - ./gradlew build -I $DEVELOCITY_INIT_SCRIPT_PATH
 
 test-gradle-job:
-    stage: build
-    extends: .gradle-inject-job
-    script:
-        - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH
+  stage: build
+  extends: .gradle-inject-job
+  script:
+    - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH
+```
+
+Optionally, if you'd like to apply the script to all builds, you may add it to the [`init.d` directory](https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home). With this approach, passing the script as `-I` to each build is no longer necessary.
+
+```yml
+.gradle-inject-job:
+  before_script:
+    - !reference [ .injectDevelocityForGradle ]
+    - gradle_init_d="${GRADLE_USER_HOME:-~/.gradle}/init.d"
+    - mkdir -p "$gradle_init_d" && cp "$DEVELOCITY_INIT_SCRIPT_PATH" "$gradle_init_d"
+  artifacts:
+    !reference [ .build_scan_links_report, artifacts ]
+
+build-gradle-job:
+  stage: build
+  extends: .gradle-inject-job
+  script:
+    - ./gradlew build
+
+test-gradle-job:
+  stage: build
+  extends: .gradle-inject-job
+  script:
+    - ./gradlew test
 ```
 
 ### Maven Auto-instrumentation
