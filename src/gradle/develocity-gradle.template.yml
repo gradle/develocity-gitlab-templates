@@ -11,7 +11,7 @@ spec:
     shortLivedTokensExpiry:
       default: '2'
     gradlePluginVersion:
-      default: '4.3.1'
+      default: '4.3.2'
     # Common Custom User Data Gradle Plugin version (see https://github.com/gradle/common-custom-user-data-gradle-plugin/)
     ccudPluginVersion:
       default: '2.4.0'
