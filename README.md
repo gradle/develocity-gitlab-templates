@@ -20,24 +20,29 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 ## Configuration
 ### Gradle Auto-instrumentation
 Include the remote template and optionally pass inputs.
-To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.example.com as an example of Develocity server URL.
+To enable Build Scan publishing for Gradle builds, the configuration would look something like presented below (using https://develocity.example.com as an example of Develocity server URL).
+
+> **_NOTE:_** The build is also instrumented with our [Common Custom User Data Gradle plugin](https://github.com/gradle/common-custom-user-data-gradle-plugin) as well, as it will provide more details about your build.
+
+#### Recommended: automatic init script installation
+
+Set `copyInitScriptToGradleUserHome: 'true'` to have the template install the init script into `$GRADLE_USER_HOME/init.d/`. Gradle discovers and applies scripts in that directory automatically, so no `-I` flag is needed on any `gradlew` invocation.
 
 ```yml
 include:
   - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.4/develocity-gradle.yml'
     inputs:
       url: https://develocity.example.com
+      copyInitScriptToGradleUserHome: 'true'
 
 build-gradle-job:
   stage: build
   script:
     - !reference [.injectDevelocityForGradle]
-    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.example.com
+    - ./gradlew check # Will publish a build scan to https://develocity.example.com
 ```
-The `.injectDevelocityForGradle` creates an init script with the instrumentation logic and exports the path as `$DEVELOCITY_INIT_SCRIPT_PATH` environment variable.
-For all other options see `inputs` section in [develocity-gradle.yml](develocity-gradle.yml).
 
-> **_NOTE:_** The build is also instrumented with our [Common Custom User Data Gradle plugin](https://github.com/gradle/common-custom-user-data-gradle-plugin) as well, as it will provide more details about your build.
+For all other options see `inputs` section in [develocity-gradle.yml](develocity-gradle.yml).
 
 #### Build Scan links
 An optional init script can be used to generate a report containing Build Scan links.
@@ -49,13 +54,14 @@ include:
   - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/main/develocity-gradle.yml'
     inputs:
       url: https://develocity.example.com
+      copyInitScriptToGradleUserHome: 'true'
 
 build-gradle-job:
   stage: build
   script:
     - !reference [.injectDevelocityForGradle]
-    - ./gradlew clean -I $DEVELOCITY_INIT_SCRIPT_PATH
-    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH
+    - ./gradlew clean
+    - ./gradlew check
     # Attach the report
   artifacts:
     !reference [ .build_scan_links_report, artifacts ]
@@ -78,13 +84,33 @@ build-gradle-job:
     stage: build
     extends: .gradle-inject-job
     script:
-        - ./gradlew build -I $DEVELOCITY_INIT_SCRIPT_PATH
+        - ./gradlew build
 
 test-gradle-job:
     stage: build
     extends: .gradle-inject-job
     script:
-        - ./gradlew test -I $DEVELOCITY_INIT_SCRIPT_PATH
+        - ./gradlew test
+```
+
+#### Deprecated: manual `-I` flag
+
+> [!WARNING]
+> This approach is deprecated. Use `copyInitScriptToGradleUserHome: 'true'` instead.
+
+When `copyInitScriptToGradleUserHome` is `false` (the default for backwards compatibility), `.injectDevelocityForGradle` writes the init script to `$CI_PROJECT_DIR` and exports its path as `$DEVELOCITY_INIT_SCRIPT_PATH`. The flag must be passed explicitly to every `gradlew` invocation:
+
+```yml
+include:
+  - remote: 'https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.4/develocity-gradle.yml'
+    inputs:
+      url: https://develocity.example.com
+
+build-gradle-job:
+  stage: build
+  script:
+    - !reference [.injectDevelocityForGradle]
+    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH
 ```
 
 ### Maven Auto-instrumentation
@@ -119,6 +145,7 @@ include:
   - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.4/develocity-gradle.yml"
     inputs:
       url: https://develocity.example.com
+      copyInitScriptToGradleUserHome: 'true'
   - remote: "https://raw.githubusercontent.com/gradle/develocity-gitlab-templates/1.3.4/develocity-maven.yml"
     inputs:
       url: https://develocity.example.com
@@ -133,7 +160,7 @@ build-gradle-job:
   stage: build
   script:
     - !reference [.injectDevelocityForGradle]
-    - ./gradlew check -I $DEVELOCITY_INIT_SCRIPT_PATH # Will publish a build scan to https://develocity.example.com
+    - ./gradlew check # Will publish a build scan to https://develocity.example.com
 ```
 
 ### Auto-instrumentation compatibility
