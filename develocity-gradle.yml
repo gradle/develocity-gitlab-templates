@@ -30,6 +30,10 @@ spec:
     # Enforce the url over any defined locally to the project
     enforceUrl:
       default: 'false'
+    # Copy the init script to $GRADLE_USER_HOME/init.d/ so Gradle applies it automatically without -I.
+    # Recommended over the -I approach. When true, DEVELOCITY_INIT_SCRIPT_PATH is not exported.
+    copyInitScriptToGradleUserHome:
+      default: 'false'
 
 ---
 .build_scan_links_report:
@@ -39,9 +43,16 @@ spec:
 
 .injectDevelocityForGradle: |
   function createGradleInit() {
-    local initScript="${CI_PROJECT_DIR}/init-script.gradle"
+    if [ "${copyInitScriptToGradleUserHome}" == "true" ]; then
+      local gradleUserHome="${GRADLE_USER_HOME:-${HOME}/.gradle}"
+      local initScript="${gradleUserHome}/init.d/develocity-injection.gradle"
+      mkdir -p "${gradleUserHome}/init.d"
+    else
+      local initScript="${CI_PROJECT_DIR}/init-script.gradle"
+      export DEVELOCITY_INIT_SCRIPT_PATH="${initScript}"
+    fi
 
-    cat > $initScript <<'EOF'
+    cat > "${initScript}" <<'EOF'
       /*
        * Initscript for injection of Develocity into Gradle builds.
        * Version: 2.0.1
@@ -572,7 +583,6 @@ spec:
       }
   EOF
 
-    export DEVELOCITY_INIT_SCRIPT_PATH="${initScript}"
     export BUILD_SCAN_REPORT_PATH="${CI_PROJECT_DIR}/build-scan-links.json"
   }
 
@@ -586,6 +596,7 @@ spec:
   gradlePluginRepositoryUsername=$[[ inputs.gradlePluginRepositoryUsername ]]
   gradlePluginRepositoryPassword=$[[ inputs.gradlePluginRepositoryPassword ]]
   url=$[[ inputs.url ]]
+  copyInitScriptToGradleUserHome=$[[ inputs.copyInitScriptToGradleUserHome ]]
 
   function createShortLivedToken() {
     local allKeys="${GRADLE_ENTERPRISE_ACCESS_KEY:-${DEVELOCITY_ACCESS_KEY}}"
@@ -710,7 +721,15 @@ spec:
   function injectDevelocityForGradle() {
     export "DEVELOCITY_INJECTION_ENABLED=true"
     export "DEVELOCITY_INJECTION_DEBUG=true"
-    export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
+    # The init script guards itself by comparing its own filename against this value. Gradle applies
+    # all init scripts it discovers — both via -I and from $GRADLE_USER_HOME/init.d/ — so if the
+    # script exists in both locations simultaneously, only the one whose filename matches will
+    # proceed; the other returns early. This prevents double-application without requiring cleanup.
+    if [ "${copyInitScriptToGradleUserHome}" == "true" ]; then
+      export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=develocity-injection.gradle"
+    else
+      export "DEVELOCITY_INJECTION_INIT_SCRIPT_NAME=init-script.gradle"
+    fi
     export "DEVELOCITY_INJECTION_CUSTOM_VALUE=GitLab"
     export "DEVELOCITY_INJECTION_URL=${url}"
     export "DEVELOCITY_INJECTION_DEVELOCITY_PLUGIN_VERSION=${gradlePluginVersion}"
