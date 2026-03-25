@@ -182,7 +182,7 @@ To generate a Develocity Access Key, you can check [Develocity Gradle plugin doc
 Develocity access keys are long-lived, creating risks if they are leaked. To avoid this, users can use short-lived access tokens to authenticate with Develocity. Access tokens can be used wherever an access key would be used. Access tokens are only valid for the Develocity instance that created them.
 If a short-lived token fails to be retrieved (for example, if the Develocity server version is lower than `2024.1`), no access key will be set.
 In that case, Develocity authenticated operations like build cache read/write and build scan publication will fail without failing the build.
-For more information on short-lived tokens, see [Develocity API documentation](https://docs.gradle.com/develocity/current/reference/api-manual/#short-lived-access-tokens).
+For more information on short-lived tokens, see [Develocity API documentation](https://docs.gradle.com/develocity/current/reference/develocity-api/#short-lived-access-tokens).
 
 
 ## License
