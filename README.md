@@ -166,7 +166,7 @@ build-gradle-job:
 ### Auto-instrumentation compatibility
 The following sections list the compatibility of the instrumented Develocity Gradle plugin and Develocity Maven extension with the Develocity version based on the given build tool in use.
 #### For Gradle builds
-For Gradle builds the version used for the Develocity Gradle plugin can be defined with the `gradlePluginVersion` input. The compatibility of the specified version with Develocity can be found [here](https://docs.gradle.com/enterprise/compatibility/#develocity_gradle_plugin).
+For Gradle builds the version used for the Develocity Gradle plugin can be defined with the `gradlePluginVersion` input. The compatibility of the specified version with Develocity can be found [here](https://docs.develocity.ai/current/miscellaneous/compatibility/).
 For the Common Custom User Data Gradle plugin which is defined with the `ccudPluginVersion` input, you can see the compatibility of the specified version with the Develocity Gradle plugin [here](https://github.com/gradle/common-custom-user-data-gradle-plugin#version-compatibility).
 
 #### For Maven builds
