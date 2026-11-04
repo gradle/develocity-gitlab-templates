@@ -13,7 +13,7 @@ The templates can also be configured to ad-hoc connect Gradle and Maven builds t
 > [!IMPORTANT]
 > Develocity 2024.1 or above is required starting from version `1.3.0` and above. See [here](#short-lived-access-tokens) for more infos.
 
-- GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ee/ci/yaml/inputs.html).
+- GitLab 15.11 since they use [inputs](https://docs.gitlab.com/ci/inputs/).
 - Shell with curl should be available on the executor
 - Network access to download from Maven central and from GitHub (those URLs can be customized, see [Configuration](#Configuration)
 
